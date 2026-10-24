@@ -1,0 +1,328 @@
+\documentclass[journal,10pt]{IEEEtran}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx,booktabs,array}
+\usepackage{cite}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{figures/}}
+\input{tables/cars-numbers}
+\newcommand{\WAPE}{\operatorname{WAPE}}
+\title{Evaluating Car-Sharing Features for Motor-Vehicle Flow Estimation under Spatial and Temporal Transfer}
+\author{Working manuscript --- author information to be supplied\thanks{Version: October 24, 2026. This manuscript evaluates car-sharing features against motor-vehicle detector counts, not passenger-car-only traffic, causal impacts, or a validated citywide origin--destination matrix.}}
+\markboth{Working Paper, October 2026}{Car-Sharing, Motor-Vehicle Counts, and Spatial Transfer}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Car-sharing rental records describe a selective set of vehicle uses, but their value for estimating wider traffic flows requires validation against independent observations. We evaluate this value through an audit-first, feature-ablation framework using car rentals and motor-vehicle counts in 2023--2024. Filtering retains 411,241 rentals. Detector identities are reconciled across changing codes, and official hourly completeness records determine which count periods are usable. Models train on 2023 observations and are evaluated through five spatial folds, with nearby devices grouped and a 250 m training exclusion buffer. The same fitted models are then tested at the excluded devices in 2024. Gradient boosting and regularised Poisson regression use four cumulative input sets: contextual variables, citywide sharing, local endpoints, and origin--destination geometry. For boosting, citywide sharing reduces pooled weighted absolute percentage error from \SpatialBoostBasePooled\%{} to \SpatialBoostGlobalPooled\%{} in 2023; local endpoints and geometric features produce no further change under the fixed configuration. In 2024, pooled error is \ForwardBoostBasePooled\%{} without sharing and \ForwardBoostGlobalPooled\%{} with it. Residual near-zero detector totals make mean device-level percentage errors unstable despite complete-recording flags. The findings show why source audits, buffered spatial tests, multiple error summaries, and subsequent-year evaluation are necessary before selective rental records are used to estimate traffic beyond observed locations.
+\end{abstract}
+\begin{IEEEkeywords}
+Car-sharing, traffic volume estimation, inductive loops, selective mobility data, spatial validation, transferability.
+\end{IEEEkeywords}
+
+\section{Introduction}
+\IEEEPARstart{C}{ities} need observations of where and when motor vehicles move to monitor road networks and plan further measurements. Fixed detectors provide repeated counts at particular positions, but their coverage and reliability vary. Car-sharing records offer a different view: they identify where a rental begins and ends and how long the vehicle remains rented. These observations can describe a service in detail without representing traffic passing a particular road section.
+
+The practical question is whether rental records help estimate motor-vehicle counts at locations whose counts are excluded from training. A large endpoint file does not answer this question by itself. Sharing users, service boundaries, parking arrangements, and vehicle availability can all affect the observed sample. Moreover, the interval between collection and return can include parking and intermediate stops. Expanding rentals to general traffic therefore requires more than multiplying their number by a market-share factor.
+
+Car-sharing research has long recognised the relationship between demand and vehicle availability \cite{jorge2013}. Empirical work also documents associations between use, location, and alternative transport options \cite{becker2017}. Research on network-wide volume estimation from probe vehicles \cite{eisinga2025} provides a related motivation for integrating selective mobility observations with fixed counts. However, rental endpoints are not vehicle trajectories. Their predictive value must be checked for the available observation type rather than inferred from results obtained with a richer source.
+
+We evaluate that value through an audit-first comparison of contextual models and progressively more detailed sharing inputs. The study uses car rentals, municipal motor-vehicle counts, and weather from 2023--2024. The count source contains hundreds of devices, allowing grouped and buffered spatial validation rather than random splits of repeated observations. Models fit 2023 counts outside each test fold and predict at excluded devices in both 2023 and 2024. Sharing activity and weather are observed for the period being estimated: the task is spatial gap filling, not forecasting before those inputs become available.
+
+The source audit is part of the evaluation, not a preliminary administrative step. The rental files differ between years, including the absence of recorded distance in 2024. The detector catalogue warns that changing codes can refer to the same physical device and supplies separate hourly completeness records \cite{bolognaLoops,bolognaAccuracy}. Ignoring either issue would change the meaning of the features or target. Even a complete-recording flag does not independently verify a sensor's physical operation, a distinction that becomes important in the local-error diagnostics.
+
+The contribution is a reproducible evaluation of selective rental features under spatial and subsequent-year transfer. Two model families use the same four cumulative input sets, and a separate scaling rule supplies an interpretable reference. We report pooled, device-level, and grouped errors because a model can fit busy detectors while failing at quieter ones. This is an empirical contribution in evaluation and interpretation, not a new prediction algorithm or a reconstruction of citywide travel demand.
+
+Three questions organise the analysis. \emph{RQ1}: which car-rental observations are usable, and what spatial and temporal patterns do they describe? \emph{RQ2}: how much do citywide activity, local endpoints, and endpoint geometry add to a contextual count model? \emph{RQ3}: do the resulting estimates transfer to excluded spatial locations and a subsequent year? Section~III addresses RQ1. Section~IV addresses RQ2 through matched feature comparisons and RQ3 through spatial and subsequent-year tests. Section~V discusses the observation and interpretation limits, and Section~VI answers the three questions.
+
+\section{Related Work}
+\subsection{Car-Sharing Demand and Recorded Rentals}
+Jorge and Correia \cite{jorge2013} review car-sharing demand estimation and operations, emphasising that observed use and vehicle supply are linked. A rental dataset therefore records realised service activity under its operating conditions, not unconstrained demand for all motorised travel. Becker et al.\ \cite{becker2017} analyse free-floating car-sharing transactions in Switzerland using spatial regression and conditional logit models. Their study supports examining the spatial context of service use; it does not make rentals a probability sample of all traffic.
+
+The distinction matters for endpoint summaries. A return close to the collection point can represent a genuine round-trip rental. A long rental can contain periods when the vehicle is stationary. Arrivals minus departures describe recorded rental flows, but do not determine available vehicles without opening stocks and operator movements. We therefore retain near-origin rentals and distinguish rental duration from driving time. The descriptive analysis establishes what the inputs represent before asking whether they help predict detector counts.
+
+\subsection{Selective Vehicle Data and Traffic Volumes}
+Network-wide traffic volume estimation from probe vehicles is an active research problem. Eisinga and Lorkowski \cite{eisinga2025} study volume estimation based on probe vehicle data, illustrating the broader objective of using selective mobile observations beyond fixed counting positions. The observation mechanism remains essential: trajectories can provide evidence of link use, whereas our rental records expose only endpoints and times. A straight line between those endpoints is a geometric predictor, not an observed road crossing.
+
+For the same reason, our comparison is not framed as a general test of probe-data traffic estimation. It evaluates particular representations of a particular rental source. A contextual baseline is necessary because calendar, weather, and position can already explain part of the target variation. A matched comparison within each model family then measures the added value of sharing rather than differences in training samples or model complexity alone. The contextual baseline is not claimed to exhaust all available road information: validated lane counts, road classes, and access constraints are not supplied as predictors here.
+
+Spatial validation must also reflect the intended use. Splitting individual dates at random would leave observations from the same detectors in both training and testing. Nearby detectors could create a similar problem even when device identifiers differ. We instead group spatially connected devices, exclude whole kilometre blocks, and remove nearby training devices through a buffer. This tests estimation away from training sensors rather than interpolation over missing times at known devices.
+
+\subsection{Count Prediction and OD Inference}
+Inferring an origin--destination (OD) matrix from traffic counts has a long methodological history. Entropy-based estimation \cite{vanzuylen1980} and generalised least squares \cite{cascetta1984} combine prior information with count constraints. More recent Bayesian work explicitly incorporates traffic assignment and route probabilities \cite{hazelton2024}. These methods address a different target from the direct count models used here.
+
+A count fit alone does not establish that an estimated OD explanation is correct. Different movements and route choices can produce similar observations at a limited set of sensors. We therefore use rental OD geometry as an input rather than reconstructing a total-demand matrix. Predictions are checked against measured detector passages; no reference trajectories or independent OD observations are available to validate the journeys that generated them.
+
+\setlength{\textfloatsep}{9pt plus 2pt minus 2pt}
+\setlength{\dbltextfloatsep}{9pt plus 2pt minus 2pt}
+\setlength{\floatsep}{7pt plus 2pt minus 2pt}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\dbltopfraction}{0.9}
+\renewcommand{\textfraction}{0.08}
+\setcounter{topnumber}{3}
+\setcounter{dbltopnumber}{3}
+
+\section{Car-Sharing Data and Rental Patterns}
+\label{sec:sharing}
+The experimental setting is Bologna, Italy. Two supplied files contain car rentals beginning in 2023 and 2024. This section answers RQ1 by auditing the records and describing when rentals occur, how their endpoints are distributed, and how arrivals and departures differ across the study area. These are descriptions of the observed service, not estimates of all motor-vehicle travel.
+
+\subsection{Data and Filtering}
+The source files contain \RawCars{} rows. Both include a user code, number plate, start and return timestamps, and endpoint coordinates. Recorded distance is present only in 2023. We use identifiers only for exact duplicate checks and remove them before writing the trip cache. Original source files remain unchanged. Precise endpoints remain potentially sensitive even after identifiers are removed and are not included in released numerical results.
+
+We parse the local timestamps and decimal-comma coordinates, then retain records with a departure in the source year, both endpoints inside latitude $44.40$--$44.60$ and longitude $11.20$--$11.50$, and finite recorded duration of at least 30 seconds. Boundary values are included. This box defines the analytical area rather than the municipal boundary. Rentals outside it are excluded from this analysis, not diagnosed as erroneous. The same rules apply in both years.
+
+\begin{table}[t]
+\caption{Car-rental filtering. Rules are applied in order; each excluded row is counted once. Outside-area rentals are not necessarily invalid.}
+\label{tab:audit}\centering\footnotesize
+\input{tables/cars-audit}
+\end{table}
+
+Table~\ref{tab:audit} retains \RetainedCars{} rentals, about 195,000 in 2023 and 216,000 in 2024. No exact duplicate or duration failure is found under these rules; the reduction is due to the endpoint box. A minimum endpoint-displacement rule would remove plausible round trips, so it is not applied. About 4\%{} of retained rentals end within 100 m of their starting position. Neither a near-origin return nor a long rental is by itself evidence of an invalid observation.
+
+Endpoint displacement uses a local equirectangular projection centred at $(44.4949,11.3426)$, with distances expressed in kilometres. It is a straight-line separation, not the distance driven. Recorded rental duration is return time minus start time and may contain stops. The main analysis does not cap it. Supplementary summaries use upper limits of two, six, and 24 hours; the prediction sensitivity experiment rebuilds every sharing feature using only rentals lasting at most six hours.
+
+\subsection{Monthly and Hourly Use}
+Figure~\ref{fig:monthly} shows monthly retained departures. The profiles differ between years: rentals are more numerous early in 2023, whereas 2024 has a marked autumn increase. These observations cannot distinguish changes in customers' travel from changes in fleet availability, service rules, or the supplied data coverage. Unlike an independently documented service census, a rental file does not establish that every potential journey could be observed.
+
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{cars-monthly}
+\caption{Monthly car-rental departures after the common endpoint and duration filters. Values describe the supplied sharing records, not total motor-vehicle demand.}
+\label{fig:monthly}
+\end{figure*}
+
+For both the sharing/count comparison and day/night descriptions, day covers 06:00--22:59. Night comprises 00:00--05:59 and 23:00--23:59 on the \emph{same calendar date}. It is therefore a set of low-hour bins, not a continuous overnight service period. This convention matches the daily detector exports without assigning early-morning counts to another source date. Night departures account for about 16\%{} of retained rentals in each year. Figure~\ref{fig:hourly} separates weekday and weekend profiles, with each year/day-type group normalised to sum to one.
+
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{cars-hourly}
+\caption{Departure-hour profiles by year and day type. Each curve sums to 100\%{} within its group. Shading marks the night bins, 00--06 and 23--24 on the same date.}
+\label{fig:hourly}
+\end{figure*}
+
+The profiles identify when this service is used, but not the purpose of individual rentals. An evening peak should not automatically be interpreted as commuting, and weekend departures need not represent a single type of leisure activity. Such explanations would require trip-purpose or user information beyond the endpoint records used here.
+
+\subsection{Displacement, Duration, and Near-Origin Returns}
+Table~\ref{tab:trips} reports quantities available in both years. Median endpoint displacement is about 2.5--2.8 km across the four year/period groups, while median rental duration ranges from about sixteen to 25 minutes. The 2024 medians are longer than the corresponding 2023 medians for both measures. This is a comparison of retained records under a common spatial filter, not a claim of longer routes or changed driving speed.
+
+\begin{table}[t]
+\caption{Retained car rentals. $^a$Median endpoint displacement, not route length. $^b$Median rental duration. $^c$Percentage returning within 100 m. $^d$Percentage rented over 24 h.}
+\label{tab:trips}\centering\footnotesize
+\input{tables/cars-trips}
+\end{table}
+
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{cars-distributions}
+\caption{Cumulative distributions of endpoint displacement and recorded rental duration. The displacement axis displays 0--20 km; the duration axis is logarithmic. Rental duration includes any time spent stopped or parked.}
+\label{fig:distributions}
+\end{figure*}
+
+Figure~\ref{fig:distributions} shows the distributional tails behind these medians. Long rentals are uncommon but cannot be treated as uninterrupted driving. More than 24 hours separate collection and return in about 1--2\%{} of the year/period groups. Since 2024 has no recorded-distance field, we do not compare reported kilometres across years or impute them from duration. Even in 2023, reported distance is not independently verified and does not reveal a route.
+
+\subsection{Origin--Destination Patterns}
+We assign endpoints to square cells and count rentals for each origin--destination pair, including within-cell movements. To compare day and night independently of their different trip totals, each matrix is normalised by its total. Jensen--Shannon distance with base-two logarithms is
+\begin{equation}
+ \begin{aligned}
+ \operatorname{JSD}(p,q)&=\sqrt{\tfrac12 D_{\mathrm{KL}}(p\Vert m)+\tfrac12 D_{\mathrm{KL}}(q\Vert m)},\\
+ m&=\tfrac12(p+q).
+ \end{aligned}
+\end{equation}
+It ranges from zero for identical distributions to one for disjoint supports.
+
+\begin{table}[t]
+\caption{Jensen--Shannon distance between normalised day and night rental OD patterns. Values depend on grid resolution and sampling.}
+\label{tab:od}\centering\footnotesize
+\input{tables/cars-od}
+\end{table}
+
+At 1 km resolution, the distance is about 0.34 in 2023 and 0.33 in 2024 (Table~\ref{tab:od}). Coarser cells reduce the difference. Sparse OD tables can also produce nonzero distances through sampling alone. Supplementary diagnostics therefore draw 20,000 observations from each period's empirical distribution, thirty times, and compare them with equally sized draws from their pooled distribution. At 1 km, the mean distances are about 0.43 for separate-period draws versus 0.31--0.32 for pooled-distribution draws. Thus the observed period contrast is not reproduced by this common-distribution sampling check, although sparsity contributes substantially to the measured distance. These are descriptive sampling checks, not confidence intervals for population OD demand. Neither the raw distance nor the check identifies an expansion factor from sharing to all traffic.
+
+\subsection{Activity and Arrival--Departure Balances}
+Figures~\ref{fig:activity} and \ref{fig:balance} pool 2023--2024 endpoint events in 500 m cells. They use four windows: 06--10, 10--15, 15--20, and 20--06. For consistency with calendar-date aggregation, the last combines 00--06 and 20--24 on a date. The windows are descriptive choices, not optimised thresholds. Departures use collection time and arrivals use return time, so a rental can contribute to different windows or dates at its two ends.
+
+The fixed 24-bin detector exports do not distinguish repeated and missing clock hours. We exclude the four Europe/Rome daylight-saving transition dates from maps and count experiments rather than infer the meaning of their ambiguous bins. The remaining dates have ordinary 24-hour exposure. Events outside the two study years are not counted as arrivals within them. Each map panel uses its window length multiplied by the number of included dates, and cells below fifty endpoint events are suppressed in both map types.
+
+\begin{figure*}[t]
+\centering\includegraphics[width=.94\textwidth]{cars-activity}
+\caption{Car-sharing endpoint activity, pooled over 2023--2024: arrivals plus departures per included hour in 500 m cells. All panels share a scale. Black dots mark eligible detector positions; these are not observed rental crossings. Coordinates are kilometres from the central reference point. No road network is imputed.}
+\label{fig:activity}
+\end{figure*}
+
+For cell $z$ and window $r$, activity is $(A_{zr}+D_{zr})/H_r$, where $A$ and $D$ denote arrivals and departures and $H_r$ is the included exposure. The normalised balance is
+\begin{equation}
+ b_{zr}=\frac{A_{zr}-D_{zr}}{A_{zr}+D_{zr}}.
+\end{equation}
+Positive values indicate more returns than collections; negative values indicate the reverse. Activity and balance answer different questions. A busy cell may be balanced, while a less active cell can have a large relative imbalance.
+
+\begin{figure*}[t]
+\centering\includegraphics[width=.94\textwidth]{cars-balances}
+\caption{Car-sharing arrival--departure balance in the same cells, dates and windows as Fig.~\ref{fig:activity}. Red indicates more returns; blue indicates more collections. All panels share the $[-1,1]$ scale and suppress cells below fifty events. Balance does not measure vehicles available for rental.}
+\label{fig:balance}
+\end{figure*}
+
+These maps describe endpoint concentrations and net rental movements. Without inventories, vehicle status, and operator relocation logs, they do not establish how many rentable cars remain in a cell. Nor can an endpoint hotspot be read as a traffic hotspot: a rental starting nearby may use another street, and traffic through a detector may have neither endpoint nearby.
+
+\section{Using Car-Sharing Data to Estimate Vehicle Counts}
+\label{sec:counts}
+We now test whether the audited rental information helps estimate independently recorded traffic. The target is the number of motor-vehicle detections by one device during a complete day or night period. The source does not classify passenger cars separately or identify sharing vehicles. We therefore use \emph{motor-vehicle counts}, not car-only counts, as the target throughout the evaluation.
+
+\subsection{Detector Identities and Measurement Completeness}
+The municipal files contain 313,067 device-day rows for 2023 and 309,561 for 2024, with 24 hourly count fields and detector metadata. The catalogue explicitly notes that a detector's code can change and identifies \texttt{ID\_univoco\_stazione\_spira} as the stable station identifier \cite{bolognaLoops}. We use that identity rather than treating every code or level as an independent location. Levels in this source describe changing identifiers, not road hierarchy.
+
+We retain active devices of loop type, valid identities and coordinates, and finite nonnegative hourly counts. Conflicting count vectors for the same device/date are discarded. Identical repeated vectors under aliases are counted once, not summed. The supplied snapshots contain 999 such repeated rows in 2023 and 674 in 2024 after the preceding checks. Four station identities whose valid positions differ by more than 100 m from their pooled median position are excluded from the prediction cohort; this prevents a moving identity from serving as a fixed spatial target.
+
+\begin{table}[t]
+\caption{Detector audit. The first exclusions refer to device-day rows; completeness exclusions refer separately to candidate day and night periods. Final site eligibility is applied afterwards.}
+\label{tab:counter-audit}\centering\scriptsize
+\input{tables/cars-counter-audit}
+\end{table}
+
+The count catalogue links separate accuracy files \cite{bolognaAccuracy}. Their documentation defines 100\%{} as measurement throughout the reference hour, zero as no measurement, and intermediate values as partial coverage. We cache both official annual exports and join them by source date and loop code before resolving aliases. Every constituent hour must have a value of exactly 100\%{} for its period to be usable. Partial periods are not scaled up, and missing or incomplete recording is not interpreted as zero traffic. If identical aliases provide different completeness, the record with the most fully recorded hours is retained, using the loop code to break ties deterministically.
+
+This restriction removes many periods (Table~\ref{tab:counter-audit}) and changes the observation population. Completeness is the municipality's recording-status field, not an independent validation of every detection. Residual zero and near-zero series are retained rather than removed after inspecting model errors. Their influence is explicitly considered below.
+
+\subsection{Eligible Devices and Spatial Splits}
+Devices must have at least 180 distinct dates with a usable period in 2023. This coverage criterion is fixed using the training year, not 2024 outcomes. It leaves \CarDevices{} eligible devices. Table~\ref{tab:coverage} reports the usable periods at these devices in each year. The 2024 test uses available observations from the same eligible identities and does not require every device to remain observed.
+
+\begin{table}[t]
+\caption{Observation coverage at eligible devices after quality and stability checks. Dates count days with at least one usable period; missing periods are not zero flows.}
+\label{tab:coverage}\centering\footnotesize
+\input{tables/cars-coverage}
+\end{table}
+
+Devices within 100 m are linked into connected components, giving \CarClusters{} spatial groups. Each group's centroid is assigned to a fixed 1 km grid cell, yielding \CarBlocks{} occupied blocks. Coordinates $x,y$ are in kilometres from the reference point. A block with integer indices $(g_x,g_y)$ belongs to fold $(g_x+2g_y)\bmod 5$. This deterministic allocation depends on position, not observed volume or prediction error. All devices in a connected component and all components in a block share a fold.
+
+\begin{figure}[t]
+\centering\includegraphics[width=\columnwidth]{cars-folds}
+\caption{Eligible detector positions and their five spatial folds. Devices are grouped before block allocation. For each fold, training additionally excludes all devices within 250 m of any test device.}
+\label{fig:folds}
+\end{figure}
+
+For each test fold, we train on eligible devices in the other four folds, additionally excluding any training device within 250 m of a test device. Training uses 2023 only. The fitted model predicts the held-out fold in 2023 and, without refitting, its available 2024 observations. The five training sets contain 494--636 devices. Neither local count histories nor neighbouring excluded counts enter the predictors. Figure~\ref{fig:folds} shows the allocation; the pipeline saves device lists and verifies the minimum train--test separation.
+
+The 2023 test evaluates buffered spatial transfer within the observed year. The 2024 test combines spatial exclusion with subsequent-year change. It does not isolate time transfer at previously observed devices, and differences in valid-period coverage between years can contribute to its aggregate results.
+
+\subsection{Models and Cumulative Feature Sets}
+Models predict a mean count per hour for each device/date/period, then multiply by the seventeen daytime or seven nighttime hours. Exposure hours are also training weights. Four cumulative input sets are used within both gradient boosting and regularised Poisson regression:
+\begin{enumerate}
+\item \emph{No sharing}: projected coordinates, distance from the reference point, weekday, annual sine and cosine terms, day/night indicator, holiday indicator, daily mean temperature, and precipitation.
+\item \emph{Citywide sharing}: the first set plus retained rental departures per hour across the analytical area.
+\item \emph{Local endpoints}: the second set plus collections and returns within 500 m of the detector, per hour.
+\item \emph{OD geometry}: the third set plus departures whose endpoint-to-endpoint chord passes within 100 or 250 m of the detector, per hour.
+\end{enumerate}
+Holidays include Italian public holidays and Bologna's patronal day. Weather is joined by calendar date. All feature sets use identical count observations. Rental features use the entire retained cohort, not a subset selected according to prediction success.
+
+For endpoints $o,d$ and sensor position $s$, chord proximity is defined by
+\begin{equation}
+ \begin{aligned}
+ u&=\frac{(s-o)^\top(d-o)}{\|d-o\|^2},\\
+ \delta&=\|o+\min(1,\max(0,u))(d-o)-s\|.
+ \end{aligned}
+\end{equation}
+A rental contributes only if $0<u<1$ and $\delta$ is within the specified radius. A zero-length chord does not contribute. These unsigned features do not assign a verified driving direction or road crossing. Returns use their own date and hour for endpoint features; chords use the departure period, even when the rental continues later. This deliberately simple representation cannot recover the timing of intermediate movement.
+
+Boosting uses Poisson loss, 120 iterations, seven leaves per tree, learning rate 0.06, minimum leaf size forty, and $L_2$ penalty ten, without early stopping. Poisson regression is log-linear with $L_2$ penalty one, at most 1,000 optimisation iterations and tolerance $10^{-7}$. Weekday and period are one-hot encoded for Poisson; numeric inputs are median-imputed and standardised using training data only. The same preprocessing is applied unchanged to test observations. Settings are fixed across feature sets and are not selected from test counts.
+
+A separate \emph{uniform expansion} baseline multiplies the 250 m chord rate by a nonnegative factor that matches the exposure-weighted total training count. It has no contextual adjustment and predicts zero when the chord feature is zero. The primary comparison therefore has nine configurations: two families with four input sets each, plus scaling. Two further fits, one per family, rebuild the complete sharing input set using rentals no longer than six hours. They test sensitivity to long rental intervals on the same count samples, rather than deleting test observations.
+
+\subsection{Error Measures and Uncertainty}
+For device $s$ with a positive observed total,
+\begin{equation}
+ \WAPE_s=\frac{\sum_{i\in s}|y_i-\widehat y_i|}{\sum_{i\in s}y_i}.
+\end{equation}
+We report \emph{macro} WAPE, the mean over devices with positive denominators, and \emph{pooled} WAPE, the sum of all absolute errors divided by all observed detections. All-zero devices have undefined device WAPE and are omitted only from macro and median percentage summaries; their absolute errors remain in the pooled calculation. No denominator is replaced with an arbitrary small constant. We also report the median device WAPE and \emph{cluster} WAPE, which pools errors and detections within each 100 m connected component before averaging across components with positive totals.
+
+These measures have different meanings. Pooled error gives more weight to busy detectors and counts repeated passages at different devices separately; it is not an error relative to unique citywide journeys. Cluster averaging reduces the multiplicity of nearby devices but can hide differences between them. Macro error treats devices equally but becomes unstable when some denominators are close to zero. Signed bias, $(\sum\widehat y-\sum y)/\sum y$, distinguishes systematic over- and underestimation from unsigned error.
+
+Paired feature contrasts compare each sharing model with the no-sharing model of the same family. We resample the occupied 1 km test blocks with replacement 2,000 times, retaining their device-level WAPE differences, and report percentile intervals for the mean difference. This avoids treating repeated periods as independent spatial samples. It does not eliminate dependence across adjacent blocks or overlapping training sets; intervals are descriptive measures of spatial variation, not simultaneous hypothesis tests or citywide uncertainty bounds.
+
+\subsection{Prediction Results}
+Tables~\ref{tab:spatial} and \ref{tab:forward} report the primary comparisons. For boosting, citywide sharing reduces pooled 2023 WAPE from \SpatialBoostBasePooled\%{} to \SpatialBoostGlobalPooled\%{}, a reduction of less than one percentage point. Under the fixed configuration, adding local endpoints or chord features produces exactly the same predictions as citywide sharing alone. The richer feature sets are therefore available to the learner but do not change its fitted predictions in this experiment.
+
+\begin{table}[t]
+\caption{Buffered spatial test in 2023. WAPE in percent. Macro averages device errors; pooled weights by detections; cluster averages after pooling within spatial components. Very large macro values are retained, not typographical errors.}
+\label{tab:spatial}\centering\scriptsize
+\input{tables/cars-prediction-2023}
+\end{table}
+\begin{table}[t]
+\caption{Excluded-device test in 2024 with the 2023 models unchanged. WAPE in percent, with the same definitions as Table~\ref{tab:spatial}. Test sharing and weather are contemporaneously observed.}
+\label{tab:forward}\centering\scriptsize
+\input{tables/cars-prediction-2024}
+\end{table}
+
+Poisson regression has pooled 2023 WAPE of \SpatialPoissonBasePooled\%{} without sharing, \SpatialPoissonGlobalPooled\%{} with citywide activity, \SpatialPoissonLocalPooled\%{} with endpoints, and \SpatialPoissonGeometryPooled\%{} with geometry. These changes are small relative to the remaining error. Uniform expansion is worse on pooled and cluster summaries, showing that a single chord-to-count factor cannot account for the observed local differences.
+
+In 2024, boosting's pooled WAPE is \ForwardBoostBasePooled\%{} without sharing and \ForwardBoostGlobalPooled\%{} with any of the primary sharing sets. Poisson's error rises from \ForwardPoissonBasePooled\%{} without sharing to \ForwardPoissonGlobalPooled\%{} with citywide sharing and \ForwardPoissonGeometryPooled\%{} with geometry. The modest 2023 pooled gain therefore does not establish a transferable sharing advantage. Nor does the larger volume of 2024 rentals imply better count predictions.
+
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{cars-prediction}
+\caption{Distribution of device WAPE for the nine primary configurations. Boxes show quartiles and the median; whiskers extend to 1.5 times the interquartile range. Outlying points are not drawn and the displayed axis ends at 1,000\%{}; the full, uncapped results are retained in Tables~\ref{tab:spatial}--\ref{tab:forward} and the numerical outputs. Devices with zero observed totals have undefined WAPE.}
+\label{fig:prediction}
+\end{figure*}
+
+The large macro values require a different interpretation from the pooled results. Some detectors have almost no observed traffic despite many officially complete periods. For example, eligible device 103 records only one detection across 501 valid periods in 2023. A nonzero prediction there yields an enormous percentage error. This observation does not prove whether the device is malfunctioning, measuring a restricted movement, or described incompletely by the metadata. It does show that recording completeness alone cannot make mean percentage error a stable summary.
+
+\begin{table}[t]
+\caption{Median device WAPE in percent for selected configurations. $S_+$ counts positive-total devices; $S$ counts all observed test devices. Undefined all-zero device WAPEs are omitted, not replaced by zero.}
+\label{tab:robustness}\centering\footnotesize
+\input{tables/cars-robustness}
+\end{table}
+
+Table~\ref{tab:robustness} and Fig.~\ref{fig:prediction} therefore accompany the uncapped macro results. Cluster errors remain high even after nearby devices are pooled, so unstable denominators are not the only problem. Conversely, the pooled signed biases can be small while absolute errors are large: overprediction at some positions cancels underprediction at others in the total, but not in WAPE.
+
+\begin{table*}[t]
+\caption{Paired sharing-minus-no-sharing differences in mean device WAPE, in percentage points. Negative values favour sharing. Percentile intervals resample spatial blocks. Extreme intervals reflect near-zero detector totals; they should not be read as precise citywide effect estimates.}
+\label{tab:contrasts}\centering\footnotesize
+\input{tables/cars-contrasts}
+\end{table*}
+
+The block contrasts in Table~\ref{tab:contrasts} expose this denominator sensitivity rather than resolving it. Very large 2023 mean changes can coexist with a small pooled change. The 2024 Poisson sharing contrasts are unfavourable, consistent with their higher pooled and cluster errors, but their magnitudes depend strongly on low-volume devices. These results answer RQ2 conditionally: sharing produces only small pooled improvements in the within-year test, and additional endpoint detail is not reliably useful. For RQ3, the improvements do not persist in the subsequent-year test.
+
+\subsection{Sensitivity and Local Calibration}
+Table~\ref{tab:sensitivity} refits the complete feature set using rentals lasting at most six hours. This removes about 5--7\%{} of the main rental cohort while keeping all count test rows. Pooled errors remain close to the corresponding full-cohort geometry results. Long rental intervals therefore do not, by themselves, explain the broad lack of a transferable advantage. This is one representation sensitivity, not proof that all rental cleaning choices are unimportant.
+
+\begin{table}[t]
+\caption{Full-feature models using only rentals of at most six hours. WAPE in percent. Count samples and spatial splits are unchanged; the contextual baseline is the same as in the primary comparison.}
+\label{tab:sensitivity}\centering\footnotesize
+\input{tables/cars-sensitivity}
+\end{table}
+
+Figure~\ref{fig:observed-predicted} separates changes over time from local volume calibration. Four devices are selected using the 12.5th, 37.5th, 62.5th and 87.5th percentiles of observed 2023 mean flow, not according to model error. Weekly rates use the same available test periods for observations and predictions, without filling unavailable weeks with zeros. The profiles illustrate that plausible seasonal variation can coexist with persistent errors in the level of a particular device.
+
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{cars-observed-predicted}
+\caption{Observed and predicted 2024 weekly rates at four devices selected by 2023 flow quantiles. Each is excluded from its model's training fold, including the 250 m buffer. Counts and predictions are summed over available complete periods and divided by their exposure. Vertical scales differ; gaps indicate unavailable observations. These examples do not replace the all-device evaluation.}
+\label{fig:observed-predicted}
+\end{figure*}
+
+The examples illustrate distinct calibration problems. At device 366, boosting with geometry overestimates the 2024 total by about 167\%{}, while the same inputs in Poisson overestimate it by about 439\%{}. At device 801, boosting with geometry instead underestimates the total by about 50\%{}. Device 722 has only about 2\%{} positive total bias with boosting geometry, but still has WAPE of about 16\%{}: cancellation in the total does not imply accurate period-level estimates. The Poisson geometry profiles also show autumn peaks that are much stronger than the corresponding measured profiles at several devices. Their timing is compatible with a response to the observed sharing increase, not proof of a real increase in local traffic.
+
+The common issue is the difference between activity near a sensor and traffic detected by it. Nearby endpoints can involve parallel streets, while through traffic can originate and terminate elsewhere. Unsigned chords ignore road access, one-way restrictions, detours, and intermediate stops. Spatial coordinates alone also omit lane and approach characteristics. These are plausible reasons for imperfect transfer, not identified causes of any particular residual. Verified routes and detector-to-road mappings would be needed to test them.
+
+\section{Discussion and Limitations}
+The results do not support treating the observed rentals as a fixed fraction of all motor-vehicle passages. The scaling baseline performs poorly, and the learned models gain little from richer endpoint detail under the tested representations. This is not evidence that car sharing is generally unrelated to traffic. It is evidence that these features, models, and validation conditions do not establish a stable improvement over contextual inputs.
+
+The audit reveals two distinct uncertainty sources. Rental records selectively observe a service, and the endpoint box deliberately omits journeys crossing its boundary. Detector records selectively observe instrumented positions and periods, with substantial losses under the complete-recording requirement. Neither source has a known sampling probability for all urban movements. Their combination cannot remove those selection mechanisms automatically.
+
+The quality flags make incomplete recording visible, but are not independent ground truth. Residual near-zero series dominate unweighted percentage averages, and all-zero devices require an explicit denominator convention. We report these cases rather than selecting a traffic threshold after observing prediction errors. Before operational deployment, provider-supported validation should establish whether these devices describe genuine low-volume movements or instrument problems. Alternative observation-error models and absolute-error summaries would then be appropriate extensions.
+
+The spatial design is stronger than a random split of repeated dates, but its units are still within one city and one sensor system. Connected components can contain several devices and do not necessarily correspond to a single road section. A 250 m buffer prevents very close training observations, not all network dependence. The same spatial folds are used for all comparisons, while their overlapping training sets limit formal independence. More cities and independent sensor networks are needed for external validation.
+
+The comparison also concerns fixed model configurations, not the best achievable estimator. More extensive spatially nested tuning, validated road attributes, and other traffic observations could strengthen both sharing and non-sharing models. Identical boosting predictions after local inputs are added mean that this learner did not exploit them under the chosen settings; they do not prove that those variables contain no information under every model. The 2024 decline in Poisson sharing performance likewise cannot be attributed uniquely to a change in travel behaviour, service coverage, or road policy.
+
+No causal effect of car-sharing use on total traffic is estimated. Rentals and traffic can respond jointly to calendar conditions, service supply, and unobserved events. Nor do detector predictions identify unique journeys or an OD matrix. A defensible citywide flow map would require validated road-section targets and broader spatial evidence; a citywide demand matrix would additionally require route assignment and independent movement validation.
+
+\section{Conclusion}
+This study evaluated car-sharing features for motor-vehicle count estimation through source auditing, matched feature comparisons, and buffered spatial and subsequent-year tests.
+
+\emph{RQ1---Usable records and rental patterns.} Common filters retain \RetainedCars{} rentals from the two supplied files. Near-origin returns are preserved, rental duration is distinguished from driving time, and both-year distance comparisons use endpoint displacement because recorded kilometres are absent in 2024. Temporal profiles, OD comparisons, and activity/balance maps describe the sharing sample without assuming it represents all traffic.
+
+\emph{RQ2---Incremental predictive value.} Citywide sharing reduces boosting's pooled 2023 spatial-test WAPE from \SpatialBoostBasePooled\%{} to \SpatialBoostGlobalPooled\%{}, while local endpoints and geometry do not alter its predictions under the fixed configuration. Poisson's pooled improvements are also small. Uniform chord expansion performs worse. More detailed rental features are therefore not, by themselves, evidence of substantially better traffic estimates.
+
+\emph{RQ3---Transfer beyond training observations.} The modest 2023 pooled benefit does not persist in 2024: boosting has WAPE of \ForwardBoostBasePooled\%{} without sharing and \ForwardBoostGlobalPooled\%{} with it, while sharing worsens the Poisson results. Residual near-zero and zero detector series further show why complete recording, stable percentage summaries, and correct local calibration are different requirements.
+
+The broader methodological lesson is to evaluate selective endpoint data against contextual baselines, reconcile changing sensor identities, use measurement-completeness information, exclude nearby training positions, and inspect multiple local and aggregate errors. The Bologna use case demonstrates this protocol, not universal performance limits. Provider-verified observations, road context, and external validation are necessary before these estimates are extended to unobserved networks. The present study predicts detector passages, not passenger-car-only flows or the OD demand that generated them.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}

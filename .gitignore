@@ -1,0 +1,68 @@
+# Dataset e dati scaricati (in qualsiasi cartella)
+dataset/
+datasets/
+dati_esterni/
+
+# Risultati e artefatti generati dalle pipeline
+results/
+/*-text/figures/
+/*-text/tables/
+cache/
+.cache/
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Ambienti virtuali Python (in qualsiasi cartella)
+.venv/
+venv/
+env/
+.env/
+
+# Cache e bytecode Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.ipynb_checkpoints/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+.nox/
+build/
+dist/
+*.egg-info/
+
+# File intermedi LaTeX; conserva i PDF compilati dei paper.
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+*.bcf
+*.run.xml
+*.xdv
+*.dvi
+
+# File locali di editor e sistema operativo
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

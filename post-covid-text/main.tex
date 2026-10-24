@@ -1,0 +1,264 @@
+\documentclass[journal,10pt]{IEEEtran}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx,booktabs,array}
+\usepackage{cite,xurl}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{figures/}}
+\input{tables/recovery-numbers}
+\title{Measuring Post-Pandemic Road Traffic Recovery: Volume, Temporal Composition, and Observation-Network Sensitivity}
+\author{Working manuscript --- author information to be supplied\thanks{Version: October 25, 2026. Empirical case study: Bologna, Italy, 2019--2025. Recovery denotes a descriptive comparison with 2019, not a causal estimate of pandemic effects or a welfare objective.}}
+\markboth{Working Paper, October 2026}{Measuring Post-Pandemic Road Traffic Recovery}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Whether urban road traffic has recovered after COVID-19 depends on what is measured, which pre-pandemic period is used, and whether the observation network remains comparable. We examine recovery as a combination of volume, temporal composition, and variation across observed locations. The empirical case uses hourly motor-vehicle counts in Bologna, Italy, from 2019 to 2025, joined to official recording-completeness exports. A balanced panel requires stable detector identities, fully recorded days, annual coverage, and observations in every month and day-type stratum. These restrictions retain only \PanelSites{} detectors, geographically concentrated rather than representative of the city. With equal-month and fixed weekday/weekend weights, the panel's volume index rises from \IndexTwenty{} in 2020 to \IndexTwentyThree{} in 2023, then falls to \IndexTwentyFive{} in 2025, with 2019 equal to 100. Broader pairwise panels provide a separate check on survivor selection. Hourly composition is much closer to its 2019 distribution by 2025 than the total volume is to its reference level; the morning share is not persistently depressed. The case illustrates incomplete and non-monotonic volume recovery at observed locations, not a universal urban trajectory. Its broader contribution is a reproducible distinction between recovery of quantities, recovery of temporal structure, and changes in the population of measurements.
+\end{abstract}
+\begin{IEEEkeywords}
+COVID-19, traffic recovery, longitudinal traffic counts, pre-pandemic baseline, temporal composition, observation networks.
+\end{IEEEkeywords}
+
+\section{Introduction}
+\IEEEPARstart{R}{eturning} to pre-pandemic traffic levels is an intuitively simple description of recovery. It is less simple to measure. An increase from the deepest lockdown trough does not establish a return to the earlier level. A return of annual volume does not establish a return of morning peaks, weekend activity, or the distribution of traffic across streets. A change in the number of functioning counters can produce an apparent recovery even when traffic at comparable locations has not increased.
+
+These distinctions matter beyond any one city. Reviews document diverse transport responses to the pandemic \cite{benita2021,abdul2022}. Planning needs to distinguish restoration of earlier patterns from continuing change. A smaller quantity of traffic can retain its previous daily rhythm; conversely, the same total can be distributed differently across hours. Neither observation, on its own, identifies teleworking, a modal shift, congestion, or economic recovery.
+
+Published research already measures unequal recovery across modes, locations and periods of the day \cite{gao2024,li2023,zheng2024}; operational monitoring also addresses reference periods and network continuity \cite{dft,cambridge2024}. We extend this empirical line rather than propose a new index. Relative to peak-focused studies, we jointly evaluate all-day volume and hourly composition; relative to shorter recovery windows, we follow observations through 2025; relative to a single retained-network summary, we quantify sensitivity to coverage and cohort membership. The contribution is this integrated longitudinal evidence using a full-year 2019 reference, not methodological priority or a causal explanation of pandemic effects.
+
+The case study is Bologna, Italy. Municipal hourly counts provide repeated observations before, during, and after the acute pandemic disruption. Bologna supplies the empirical setting rather than the geographical scope of the research question. The aim is not to establish an exceptional local trajectory, but to examine what can defensibly be concluded about recovery from an evolving urban detector archive.
+
+Three questions organise the analysis. \emph{RQ1}: how does calendar-standardised traffic volume evolve relative to 2019, and does later recovery remain monotonic? \emph{RQ2}: do weekday/weekend and within-day distributions recover in the same way as volume? \emph{RQ3}: how sensitive are the conclusions to measurement coverage, detector retention, and aggregation? These questions concern observed motor-vehicle passages. They do not concern unique journeys, passenger-car traffic alone, or citywide vehicle-kilometres.
+
+The analysis combines a fixed seven-year panel with pairwise 2019--later-year panels. Recording completeness is required, while coverage thresholds balance longitudinal comparability against network retention. Selection is based on observation availability rather than recovery outcomes, and alternative annual coverage thresholds provide sensitivity checks. The resulting contribution is an empirical demonstration of the difference between a traffic recovery statement and a statement about the changing measurements used to support it.
+
+The rest of the paper is organized as follows. Section~II reviews related work on recovery measurement. Section~III introduces the case study and observation audit. Section~IV defines the recovery measures and analysis design. Section~V presents the results. Section~VI discusses their interpretation and limitations, and Section~VII concludes.
+
+\clearpage
+\section{Related Work}
+\subsection{Reference Levels and Calendar Alignment}
+Recovery measurement requires an outcome and a comparator. A ratio to a pre-pandemic level measures a remaining gap; a post-trough slope measures rebound speed; a threshold crossing measures timing but can be temporary. These measures need not give the same account of recovery.
+
+Early count-based studies in Minneapolis--St. Paul \cite{liu2021} and multimodal monitoring in Santander \cite{aloi2020} quantify immediate disruption and initial adjustment; these short-run responses are not evidence of sustained restoration.
+
+The British Department for Transport's road tracker uses approximately 275 automatic counters and compares each day with the corresponding weekday in the first week of February 2020 \cite{dft}. Its methodology warns that ordinary seasonal variation can reach approximately $\pm20\%$. Crossing 100 therefore need not mean matching the same season of 2019; different reference periods also complicate comparisons between modes.
+
+Li et al.\ \cite{li2023} study Chicago ride-hailing through March 2022 using ratios to 2019, holiday and weekday matching, smoothing, and trajectory clustering. Their method treats recovery as spatially differentiated trajectories, but observes one service and imputes missing tract information. We instead use non-holiday monthly weekday/weekend strata without imputing counts. This simpler calendar matching does not control the mixture of individual weekdays within each group.
+
+
+\subsection{Recovery of Volume Versus Recovery of Peaks}
+Gao and Levinson \cite{gao2024} analyse five-minute freeway data in six Californian cities, using working days in March--July 2018--2021. Their geometric measurement of double-humped morning peaks and different morning/evening recovery shows why daily volume alone is insufficient. Flow recovery must also be distinguished from travel-time recovery.
+
+Li, Zhao and Wang's Glasgow dataset spans October 2019--September 2023 and shows a reappearing but incompletely restored morning peak \cite{glasgow2025}. Its SCOOT units and aggregation differ from our vehicle counts, and its 2019 reference is partial. Aletta et al.\ \cite{aletta2022} compare Rome's October 2019/2022 morning peak using probe data, demand estimation and assignment, finding approximately 10\%{} lower modelled vehicle-kilometres. These are useful temporal comparators, not directly comparable all-day recovery percentages.
+
+Dutch mobility-panel evidence likewise distinguishes returning activity from changed timing, motives and modes \cite{drift2022}. We separate hourly levels from shares, without claiming subhourly peak geometry or identified trip purposes.
+
+\subsection{Changing Observation Networks and Uneven Recovery}
+Glasgow's refinement retains 470 of 1,033 sensors after spatial, temporal, interpolation and zero-series checks \cite{glasgow2025}. Cambridgeshire's June 2024 monitoring retains fourteen uninterrupted strategic-road sensors and warns that changing membership makes sums incomparable across reports \cite{cambridge2024}. A recovery percentage therefore belongs to a declared observation network, not automatically to a city.
+
+Spatially differentiated trajectories also appear in Chicago \cite{li2023} and, at a different scale, Chinese provinces \cite{zhang2022}. Detector differences can additionally reflect rerouting or instrument changes; they are not automatically behavioural effects.
+
+Glasgow's associated analytical study relates traffic to built environment and spatial dependence \cite{glasgow2024}. Our focus is instead the robustness of longitudinal recovery summaries. Kunming transit records distinguish recovery of frequency, distance and activity space \cite{wang2022}; Dutch train panels identify heterogeneous observed and intended trajectories \cite{kroesen2023}. Neither service-specific recovery nor intentions directly measure general road traffic.
+
+\begin{table}[!ht]
+\caption{Selected recovery-measurement approaches. Targeted methodological comparison, not a systematic review.}
+\label{tab:literature}\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{1.8cm}p{2.7cm}p{3.4cm}}
+\toprule
+Study & Recovery measurement & Main comparability issue \\
+\midrule
+DfT \cite{dft} & Same-weekday reference-week index & Seasonal variation remains. \\
+Chicago \cite{li2023} & Calendar-matched ratios and trajectory clusters & Ride-hailing is a selective service. \\
+California \cite{gao2024} & Five-minute peak geometry & Shape is distinct from volume. \\
+Rome \cite{aletta2022} & October peak-period VKT & Modelled distance is not passages. \\
+Glasgow \cite{glasgow2025} & Refined network and hourly distributions & Continuity and zero-series selection. \\
+Cambridgeshire \cite{cambridge2024} & Matched-period sensor panels & Membership defines the comparison. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Behavioural Mechanisms and Scope of Inference}
+Zheng et al.\ \cite{zheng2024} relate remote work to US vehicle-miles and transit ridership, finding different relationships by mode. Nello-Deakin et al.\ \cite{nello2024} identify normalised teleworking but limited broader mobility-regime transformation in metropolitan Barcelona. These findings suggest possible mechanisms, not coefficients transferable to our detector panel.
+
+Without workplace attendance, trip purposes or mode choices, traffic curves cannot identify teleworking effects.
+
+Beijing's longitudinal mode-switch analysis \cite{beijing2024} uses movement evidence beyond fixed counts. Our data cannot reproduce that behavioural attribution.
+
+\subsection{Positioning and Contribution}
+Our contribution is an empirical extension at the intersection of these approaches. Unlike a peak-only comparison, it jointly measures all-day volume and hourly shares. Unlike the cited early recovery windows, it follows a full-2019 reference through 2025. Building on existing sensor-quality and retained-network work, it explicitly compares a common seven-year cohort with alternative-coverage and pairwise cohorts. The added evidence concerns whether apparent restoration persists and survives observation-design choices. Normalised indices, temporal-profile analysis and panel cleaning are established tools; neither their invention nor a universal urban recovery trajectory is claimed.
+
+\clearpage
+\section{Case Study and Observation Audit}
+\subsection{Source and Measurement Unit}
+Seven supplied municipal CSV files contain daily records with twenty-four hourly count fields for 2019--2025 \cite{counts}. Each file spans January 1 to December 31. The files contain detector codes, station identifiers, positions, device types, status, and street information. Counts record motor-vehicle detections at an instrument. They do not classify passenger cars separately, identify occupants, or reveal whether the same vehicle also passes another detector. Summing devices therefore produces an index over observed passages, not a count of unique urban journeys.
+
+The analytical area includes positions within latitude $44.40$--$44.60$ and longitude $11.20$--$11.50$. This is a fixed observation box, not a claim to follow the municipal boundary. We retain active devices of loop type with valid station identities, coordinates and dates, and finite nonnegative hourly counts. The annual audit is retained in full numerical outputs; Table~\ref{tab:audit} summarises its main consequences.
+
+\begin{table}[t]
+\caption{Source audit before cross-year stability and panel eligibility. Complete days require all 24 hourly recording flags to equal 100\%. Zero days are counted, not silently treated as missing.}
+\label{tab:audit}\centering\scriptsize
+\input{tables/recovery-audit}
+\end{table}
+
+\subsection{Identity, Aliases and Recording Completeness}
+Municipal documentation warns that a detector's operational code can change. We therefore track the same physical station over time using the municipality's stable station reference. Repeated copies of the same station's daily counts are retained once, not added, and conflicting copies are excluded. Official recording-status records are linked before repeated entries are reconciled; their exact provenance is documented in the accompanying source manifest. When identical copies have different recording status, we retain the most complete one using a deterministic rule. Conflicting recording-status entries cannot certify complete measurement and are discarded.
+
+The official description distinguishes full recording, absent recording, and partial recording. We require exactly 100\%{} for every hour of a retained day. Incomplete days are not scaled up, and absent records are not zero traffic. This daily rule ensures that hourly profiles and daily totals refer to the same exposure, but sacrifices substantial coverage. It is stricter than an hourly analysis and is not presented as the only defensible way to use the archive.
+
+Each year has two daylight-saving transitions whose repeated or missing clock hours cannot be resolved from fixed twenty-four-bin exports. We remove those dates. To avoid treating a changing position as a fixed target, a station is excluded from longitudinal analysis if any retained candidate position is more than 100 m from its pooled median position. This removes six identities across the seven annual snapshots. It does not independently verify that every remaining device measured the same lane or approach throughout the period.
+
+The audit reveals changing observation availability: fully recorded days number approximately 150,000 in 2019, 169,000 in 2022, and 100,000 in 2024. These are device-days rather than dates. Raw sums over the usable archive would consequently combine traffic changes with exposure and network changes. Recording completeness also does not independently establish the correctness of a physically operating detector. The wider archive contains all-zero days even under full-recording flags, and these are preserved for transparent diagnostics.
+
+\subsection{The Balanced Panel and Its Geography}
+Primary eligibility requires at least 120 complete dates in \emph{each} year. For standardisation, every site/year/month must additionally have at least two non-holiday weekdays and one non-holiday weekend day. Each accepted day must be fully recorded. Holidays include Italian national public holidays, Easter and Easter Monday, and Bologna's patronal day. Selection uses coverage, not whether a detector appears to recover. The resulting estimand describes non-holiday traffic under a fixed calendar mixture, rather than actual annual totals including holidays.
+
+These rules leave \PanelSites{} devices in \PanelBlocks{} occupied 1 km blocks, with \PanelDays{} complete device-days before holiday exclusion. Figure~\ref{fig:network} compares their positions with the 907 distinct source stations observed within the analytical box after basic device and position checks over 2019--2025. The accepted panel includes western as well as eastern corridors, although its coverage remains uneven and cannot be assumed representative of the city. There are \ZeroPanelDays{} zero-total panel-days, retained rather than automatically diagnosed as failures. Requiring 240 complete days every year yields no qualifying seven-year panel under the monthly requirements.
+
+\begin{figure}[!t]
+\centering\includegraphics[width=\columnwidth]{recovery-network}
+\caption{Accepted seven-year detectors (blue, 70 stations) relative to all other source stations (grey, 837) in the analytical box. The overall network is the union of station positions in the 2019--2025 source files after basic active-loop, identity and position checks, not a claim that all stations operated simultaneously. Counts refer to distinct stations; nearby symbols may overlap.}
+\label{fig:network}
+\end{figure}
+
+\section{Recovery Measures and Analysis Design}
+\subsection{A Fixed Calendar and a Fixed Set of Devices}
+Let $\bar q_{symk}$ denote mean complete-day volume at site $s$, year $y$, month $m$, and day type $k$, with $k=0$ for weekdays and $k=1$ for weekends. Holidays are excluded. For each site/month, define
+\begin{equation}
+ v_{sym}=\frac{5}{7}\bar q_{sym0}+\frac{2}{7}\bar q_{sym1},
+ \qquad
+ v_{sy}=\frac{1}{12}\sum_{m=1}^{12}v_{sym}.
+\end{equation}
+The weights are fixed across years. Equal months prevent changing observed-day counts from changing the seasonal mixture; the $5/7,2/7$ weights prevent changing weekday/weekend availability from changing the nominal week. We do not fill missing strata: all are required for the primary panel.
+
+For fixed panel $S$, the principal volume index is
+\begin{equation}
+ I_y=100\frac{\sum_{s\in S}v_{sy}}{\sum_{s\in S}v_{s,2019}}.
+\end{equation}
+Monthly indices use the same ratio for the corresponding month of 2019. The annual index is a ratio of standardised sums, not an unweighted average of monthly ratios. Busy devices contribute more than quiet devices, but no device is weighted by a known sampling probability. We also report the median of $100v_{sy}/v_{s,2019}$ and the share of devices reaching 95 and 100. A zero 2019 denominator cannot define a site ratio and is excluded from panel eligibility; later-year zeros, if present, would be retained.
+
+The 95 threshold is a descriptive near-reference convention, not a statistical equivalence margin. Three consecutive monthly indices at or above a threshold provide an additional persistence diagnostic. A temporary crossing does not establish an irreversible recovery date. With only one complete pre-pandemic year, we cannot estimate the secular pre-pandemic trend or the traffic level that would have occurred without COVID-19. The reference is observed 2019, not a modelled no-pandemic counterfactual.
+
+\subsection{Day Types and Temporal Composition}
+Weekday and weekend indices use equal-month averages separately, over the same device panel. For within-day analysis, hourly means are computed from the same complete dates used for daily totals, then averaged equally across months. For day type $k$, let $Q_{ykh}$ be the sum across panel devices of these standardised hourly means. We report both the hourly level and
+\begin{equation}
+ p_{ykh}=\frac{Q_{ykh}}{\sum_{j=0}^{23}Q_{ykj}},
+\end{equation}
+which isolates the share assigned to an hour from the total amount of traffic. A small compositional change can coexist with a large volume deficit. We summarise differences with Jensen--Shannon distance using base-two logarithms, and with total variation, $\tfrac12\sum_h|p_{ykh}-p_{2019,kh}|$. Both range from zero to one. They are descriptive distances, not tests of behavioural equivalence.
+
+Four broad weekday windows provide easily interpreted contrasts: morning 07--09, evening 17--19, midday 10--16, and night 00--06. Window indices sum hourly levels before forming their ratio to 2019. Window shares refer to the day's total. These are clock-time descriptions, not identified commuting, leisure, or freight categories. They are not a partition of the full day, and their definitions are not selected by the observed recovery results.
+
+\subsection{Variation, Trends and Sensitivity}
+We resample fixed 1 km spatial blocks with replacement 2,000 times, retaining all devices inside each sampled block, and recalculate the ratio of sums. The 2.5th and 97.5th percentiles describe sensitivity to which observed blocks are represented. There are \PanelBlocks{} occupied blocks, with adjacent-block dependence and a geographically selective network. These intervals do not quantify citywide uncertainty, recording error, or within-stratum day-to-day sampling variation. In particular, the 2019 reference is held fixed within each resampled block.
+
+For a separate temporal summary, we regress the monthly index on calendar-month indicators and a linear time term over 2022--2025. Newey--West covariance \cite{newey1987} with twelve lags allows serial dependence. A 2023--2025 fit checks sensitivity to the start of the later period. The latter window is a descriptive endpoint sensitivity, not a formally identified structural break or a change point selected with independent validation. Forty-eight or thirty-six monthly observations provide limited information for asymptotic interval estimation.
+
+Coverage sensitivity changes the minimum annual number of complete days to ninety, 180 and 240 while retaining the monthly requirements. A positive-day diagnostic recomputes the analysis after excluding zero days, making explicit the effect of such a potentially selective choice. An equal-block summary pools volumes within blocks, forms block-specific ratios to 2019, and then averages blocks equally. This changes geographical weighting rather than adding new locations.
+
+Finally, separate pairwise panels require the same 120-day annual and monthly-stratum criteria in 2019 and one later year, without requiring survival in all intervening years. They provide broader spatial evidence but change membership across annual comparisons. They cannot supply a continuous trajectory for one common network. Contrasting these panels with the fixed cohort assesses one part of survivor sensitivity; agreement cannot prove that either network represents all urban traffic.
+
+\section{Results}
+\subsection{A Strong Initial Rebound Without Complete Restoration}
+Table~\ref{tab:annual} and Fig.~\ref{fig:monthly} show a large initial disruption followed by a substantial but incomplete rebound. The fixed-panel annual index is \IndexTwenty{} in 2020, \IndexTwentyOne{} in 2021 and \IndexTwentyTwo{} in 2022, with 2019 equal to 100. April 2020 is the lowest monthly observation, at 27.7 relative to April 2019. Annual averaging therefore conceals a much deeper temporary trough.
+
+\begin{table}[t]
+\caption{Balanced-panel annual recovery. Index: ratio of standardised sums, 2019 = 100. Intervals resample spatial blocks. Median and threshold share describe individual devices, not independent city samples.}
+\label{tab:annual}\centering\scriptsize
+\input{tables/recovery-annual}
+\end{table}
+
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{recovery-monthly}
+\caption{Monthly volume relative to the same month of 2019, using the fixed device panel and fixed weekday/weekend weights. Shading marks March--May 2020 as a visual reference, not an estimated intervention boundary. Values describe observed corridors, not total city travel.}
+\label{fig:monthly}
+\end{figure*}
+
+The annual index reaches \IndexTwentyThree{} in 2023, before declining to \IndexTwentyFour{} in 2024 and \IndexTwentyFive{} in 2025. Thus recovery is not well described as a monotonic return to 100. The gap in 2025 is approximately 10.7\%{} of the standardised 2019 level. Its spatial-resampling interval is approximately 84.9--93.8 in index units, but this interval cannot extend the result beyond the sampled corridors.
+
+After the initial trough, the first three-month sequence reaching at least 90 begins in June 2021. No three consecutive monthly indices reach 95 or 100 through the end of 2025. This threshold diagnostic reinforces the distinction between a substantial rebound and sustained near-reference volume, without defining a universal recovery criterion.
+
+The 2022--2025 month-adjusted slope is $-1.11$ index points per year, with a HAC interval of $[-2.19,-0.02]$. This fit describes a later decline rather than continuing positive recovery. The 2023--2025 summary is more negative, $-2.47$ points per year, with interval $[-3.05,-1.89]$. These are compact descriptions of the observed sequence. Their difference demonstrates sensitivity to the chosen time window; neither identifies an enduring trend, a pandemic legacy, or a policy effect.
+
+\subsection{Volume and Temporal Structure Recover Differently}
+By 2025 the weekday index is 89.8 and the weekend index is 88.0. In 2021 the difference is larger: 88.6 on weekdays versus 80.6 on weekends. In this cohort, weekend activity does not recover earlier or more completely than weekday traffic. This is a local finding and should not be generalised to cities or mobility services where the reverse pattern has been observed.
+
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{recovery-annual}
+\caption{Left: annual ratio-of-sums index and median device ratio. Error bars are spatial-block percentile intervals, not population confidence bounds. Right: separately standardised weekday and weekend indices on the same device panel.}
+\label{fig:annual}
+\end{figure*}
+
+The weekday morning-window index is 90.3 in 2025, compared with 88.3 in the evening, 91.8 at midday, and 88.9 during 00--06 (Table~\ref{tab:windows}). Morning traffic remains below its 2019 level, but its share of weekday detections increases slightly, by 0.09 percentage points. The evening share falls by 0.23 points, while the midday share increases by 0.82 points. A smaller number of passages therefore retains a substantial part of the earlier diurnal structure (Fig.~\ref{fig:hourly}). An absolute peak-volume deficit is not, in this case, evidence of a persistently reduced peak share.
+
+\begin{table}[t]
+\caption{Weekday window indices, 2019 = 100. $^a$Change in the window's share of all weekday detections, 2025 minus 2019, in percentage points. Windows do not partition the full day.}
+\label{tab:windows}\centering\scriptsize
+\input{tables/recovery-windows}
+\end{table}
+
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{recovery-hourly}
+\caption{Weekday hourly levels (left) and normalised shares (right) for selected years, with equal-month averaging. The same fully recorded days supply all hours of a device/day. Similar shares do not imply restoration of volume or identify trip purposes.}
+\label{fig:hourly}
+\end{figure*}
+
+Jensen--Shannon distance between the weekday hourly shares and 2019 is approximately 0.050 in 2021 and 0.018 in 2025. Weekend distances are approximately 0.066 and 0.016, respectively. Total variation in 2025 is approximately 0.017 on weekdays and 0.015 at weekends. These small aggregate compositional distances coexist with volume indices well below 100. They show that restoration of broad temporal structure can be much closer than restoration of quantities. Aggregation can still conceal offsetting changes among devices, and hourly bins cannot determine whether sharper subhourly peaks changed.
+
+\subsection{Spatial Differences and Network Sensitivity}
+The 2025 median device ratio is 89.1, close to but not identical to the ratio of sums. Device ratios have an interquartile range of approximately 82.1--99.8. Only 30.0\%{} of devices reach 95\%{} of their standardised 2019 level, and 25.7\%{} reach 100. Some locations therefore exceed the reference while most remain below it. Figure~\ref{fig:spatial} shows the distribution without converting it into a map of citywide demand.
+
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{recovery-heterogeneity}
+\caption{Left: fixed-panel positions coloured by the 2025/2019 device index; grey dots show the wider source network. Colour limits are clipped at 50 and 150 only for display. Right: empirical distribution of uncapped device indices. Uneven spatial coverage limits geographical interpretation.}
+\label{fig:spatial}
+\end{figure*}
+
+Setting annual coverage to ninety complete days retains 72 devices and gives a 2025 index of 89.2, compared with 89.3 for the primary panel (Table~\ref{tab:sensitivity}). Raising annual coverage to 180 days retains 42 devices, with an index of 90.8. No panel satisfies the 240-day version. Excluding zero days and reapplying eligibility retains 67 primary-panel devices and gives 89.2. This diagnostic changes both day selection and cohort membership; it does not establish whether individual zero observations are physical failures or justify removing them by default.
+
+\begin{table}[t]
+\caption{Observation-design sensitivity. All indices use 2019 = 100. $S_{2025}$ is the device count for the 2025 comparison. Pairwise membership changes across years. A dash indicates no qualifying panel, not zero traffic.}
+\label{tab:sensitivity}\centering\scriptsize
+\input{tables/recovery-sensitivity}
+\end{table}
+
+Pairwise panels retain 196--330 devices, compared with 70 in the seven-year panel. The 2019--2025 panel includes 224 devices and has an index of 88.6, also indicating incomplete restoration. Its membership differs from the panels for other years, so differences between their annual indices must not be interpreted as within-network growth. Their role is to test whether the fixed panel's broad endpoint finding is contradicted by a less restrictive comparison, not to erase the panel's geographical selection. Equal weighting of the 24 fixed-panel blocks gives a 2025 index of 88.6, compared with the primary 89.3. Figure~\ref{fig:sensitivity} presents the designs together so that weighting and membership choices remain visible.
+
+\begin{figure}[t]
+\centering\includegraphics[width=\columnwidth]{recovery-sensitivity}
+\caption{Alternative coverage and weighting designs. Lines joining pairwise results are visual guides across different cohorts, not one longitudinal network. The 240-day design has no eligible sites and therefore no plotted trajectory.}
+\label{fig:sensitivity}
+\end{figure}
+
+The dangers of exposure-naive aggregation are large in this archive. The sum over all complete device-days, without fixing devices or calendar exposure, would produce an index of approximately 107.5 in 2022 and 63.4 in 2024. In the primary panel those years are 92.4 and 92.6. The naive values do not measure an overshoot followed by a comparable collapse: they include changes in the set and number of available measurements. Dividing by the number of available device-days reduces exposure differences but still changes the mix of roads, dates, and traffic levels. Neither shortcut substitutes for a declared longitudinal estimand.
+
+\section{Discussion}
+\subsection{Interpreting an Incomplete and Non-Monotonic Recovery}
+The observed sequence combines a rapid rebound from the acute disruption with a later period below the 2019 level. That is not evidence that urban activity failed to recover by the same proportion. The target is road passages at selected instruments, and the archive contains neither economic activity nor a comprehensive travel survey. Nor is a return to 100 necessarily a desirable transport-policy outcome: fewer motor-vehicle movements could accompany improved accessibility, reduced travel needs, or displacement to unobserved roads. The data do not distinguish these possibilities.
+
+The within-day results are particularly important when positioned against the literature. Californian freeway and Glasgow observations motivate close attention to morning peaks \cite{gao2024,glasgow2025}. Our selected corridors do not exhibit a smaller morning share in 2025, despite lower morning volume. This does not refute teleworking effects elsewhere. It shows why absolute peak recovery and compositional peak recovery are different empirical statements. Remote work, changes in school travel, delivery activity, road access and rerouting could all contribute, but the present observation system cannot separate them.
+
+The contrast with Rome's peak-period VKT comparison \cite{aletta2022} also helps delimit interpretation. A similar percentage deficit in one window would not imply agreement in annual travel, distance, emissions or congestion. We observe passages but not travel speeds, occupancy, route lengths, or vehicle technology. Translating the indices into emissions or delay would require additional observations and an explicit model.
+
+\subsection{What the Case Contributes Beyond Its Location}
+The case supports a general reporting discipline rather than a universal recovery rate. First, state whether recovery means a level, a slope, a sustained crossing, or a distributional resemblance. Second, identify the reference calendar and keep the exposure weights explicit. Third, distinguish changes in traffic from changes in the measuring network. Fourth, show location-level variation alongside pooled summaries. These principles extend the practical lessons of operational recovery monitoring \cite{dft,cambridge2024} and longitudinal sensor refinement \cite{glasgow2025}.
+
+An index normalised to 100 is useful precisely because it removes units, but that convenience can hide incompatible denominators. A full-year 2019 reference, a February 2020 week, a modelled October peak, a smartphone visit count, and a ride-hailing service each define different comparisons. The literature should therefore be used to frame expectations about multidimensional and uneven recovery, not to assemble a league table of superficially comparable percentages.
+
+\section{Conclusion}
+This study examined post-pandemic traffic recovery as a measurement problem with three distinct dimensions: volume relative to a declared reference, restoration of temporal composition, and comparability of the observation network.
+
+\emph{RQ1---Volume and trajectory.} In a small fixed detector panel, the calendar-standardised index rises from \IndexTwenty{} in 2020 to \IndexTwentyThree{} in 2023, then declines to \IndexTwentyFive{} in 2025. This is an incomplete and non-monotonic restoration of observed passages relative to 2019, not an identified long-term pandemic effect.
+
+\emph{RQ2---Temporal composition.} Weekday and weekend recovery differ. By 2025, aggregate hourly shares are much closer to their 2019 distributions than the volume index is to 100. The morning share is slightly higher, not persistently depressed. Similarity of daily rhythm and recovery of traffic quantity are therefore separate conclusions.
+
+\emph{RQ3---Observation sensitivity.} The selection criteria retain 70 detectors with fully recorded days, at least 120 complete dates in each year, and observations in every monthly day-type stratum. Broader pairwise comparisons provide additional evidence, but not a representative citywide estimate. Exposure-naive sums can imply a substantially different trajectory.
+
+Bologna demonstrates these distinctions as one case study. The transferable lesson is to report recovery with its target, baseline, calendar weights, retained network and uncertainty limits attached. Longitudinal traffic archives can support useful evidence about post-pandemic change, provided that a return of measurements is not confused with a return of mobility.
+
+\section*{Data and Code Availability}
+The municipal count and recording-status sources are available under CC BY 4.0. Supplied count snapshots remain unchanged. The accompanying code freezes annual source metadata and completeness exports, audits device-days, generates all numerical tables and figures, and tests audit reconciliation and index definitions. Exact source URLs, hashes, software versions and derived-output hashes are recorded in the reproducibility manifest. The analysis does not use the car-sharing, bike-sharing, air-quality or weather files present in the working directory. Authorship and repository-release details remain to be supplied before submission.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}
