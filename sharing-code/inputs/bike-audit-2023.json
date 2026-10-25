@@ -1,0 +1,31 @@
+{
+  "year": 2023,
+  "cohort_version": "endpoint-min30-v3",
+  "minimum_ride_seconds": 30,
+  "raw": 2285447,
+  "exact_duplicates": 1,
+  "labels": {
+    "E-bike": 2089179,
+    "Muscolari": 196268
+  },
+  "flags_nonexclusive": {
+    "invalid_time": 0,
+    "duration_outside_0_5_180_min": 369905,
+    "duration_below_30_seconds": 368852,
+    "missing_duration": 0,
+    "outside_analysis_box": 111,
+    "distance_outside_0_50_km": 3274,
+    "unknown_type": 0,
+    "chord_speed_over_45_kmh": 273128,
+    "chord_under_100m": 303065
+  },
+  "retained": 1731828,
+  "endpoint_valid_before_duration": 1982274,
+  "removed_by_duration_from_endpoint_cohort": 250446,
+  "start_min": "2023-01-01 00:00:00",
+  "start_max": "2023-12-31 23:59:29",
+  "valid_duration_retained": 1731050,
+  "valid_distance_retained": 1729856,
+  "zero_duration_all_unique": 277528,
+  "sha256": "ba3e5397d57f5ba1d29bcfbbde64ea88bd8f9959f6b9365b840cde2fa887d61c"
+}

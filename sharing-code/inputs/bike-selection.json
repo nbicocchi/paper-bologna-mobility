@@ -1,0 +1,21 @@
+{
+  "excluded_sites": [
+    "Laura_Bassi",
+    "Massarenti",
+    "Mazzini",
+    "Murri",
+    "Orti",
+    "Saragozza"
+  ],
+  "input_rows_2023_2024": 100608,
+  "excluded_rows": 8088,
+  "excluded_site_rows": {
+    "Laura_Bassi": 840,
+    "Massarenti": 1536,
+    "Mazzini": 1536,
+    "Murri": 1200,
+    "Orti": 1440,
+    "Saragozza": 1536
+  },
+  "selection_basis": "User-requested exclusion, not automatic fault or performance classification."
+}

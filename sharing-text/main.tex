@@ -1,0 +1,245 @@
+\documentclass[journal,10pt]{IEEEtran}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,graphicx,booktabs,array}
+\usepackage{cite,xurl}
+\usepackage[hidelinks]{hyperref}
+\graphicspath{{figures/}}
+\newcommand{\WAPE}{\operatorname{WAPE}}
+\title{Reading Urban Rhythms, Estimating Traffic: Evidence from Bike and Car Sharing}
+\author{Working manuscript --- author information to be supplied\thanks{Version: October 25, 2026. Bologna, 2023--2024.}}
+\markboth{Working Paper, October 2026}{Sharing Endpoints, Traffic Counts, and Transferability}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Sharing records can reveal the city's daily rhythms, but can they also describe traffic beyond sharing users? We compare bike-sharing and car-sharing data with independent traffic counts in Bologna, Italy, in 2023--2024. Our contribution is to show both a shared descriptive strength and similar predictive limits across two different services. Rental balances reveal morning arrival surpluses in central and northern areas, followed by late-afternoon departure surpluses there and arrival surpluses farther out. These patterns expose changing urban polarities. Yet detailed knowledge of sharing activity does not automatically yield reliable estimates of general traffic. Adding local rental information does not consistently improve accuracy, and benefits found in one year do not reliably carry over to the next, although some estimates improve. The central message is that reading urban rhythms and estimating wider traffic are distinct capabilities: sharing records support the first, while the second requires independent validation.
+\end{abstract}
+\begin{IEEEkeywords}
+Selective mobility data, bike-sharing, car-sharing, traffic count estimation, spatial validation, transferability.
+\end{IEEEkeywords}
+
+\section{Introduction}
+\IEEEPARstart{S}{haring} systems record where and when vehicles are collected and returned, exposing daily rhythms and changing urban polarities. Traffic monitoring asks a further question: how many vehicles pass a particular section, including those outside the service? An informative rental map need not answer it. Service use depends on customers, availability and operating boundaries; a measured passage depends on the route taken. We distinguish the ability to describe urban activity from the ability to estimate wider traffic.
+
+Bike-sharing and car-sharing offer a revealing comparison. Their users, vehicles and operating conditions differ \cite{fishman2016,jorge2013}. Bicycle rentals are predominantly short intervals of use, whereas car rentals can include parking and intermediate stops. Their observation networks also differ: sparse directional bicycle sections versus hundreds of motor-vehicle detectors. Studying both services in the same city lets us ask which descriptive strengths and predictive limitations survive these differences.
+
+We make two connected contributions. First, both services reveal common daily polarities: central and northern areas tend to receive rentals in the morning and send them out in the late afternoon, while outer areas show the reverse. Second, the experiments show a \emph{convergence of predictive limits despite different data and domains}: finer endpoint detail does not reliably improve traffic estimates, and within-year benefits need not persist. Exceptions remain, including a bicycle geometry benefit for boosting. The contribution is the contrast between useful urban description and conditional traffic estimation, not a claim that sharing is useless.
+
+Existing bicycle-volume research tests spatial extrapolation \cite{bhowmick2023,kaiser2025}; probe-vehicle research pursues a related objective for motor traffic \cite{eisinga2025}. We study both domains in Bologna in 2023--2024. A common framework adds citywide activity, local endpoints and OD geometry to contextual boosting and Poisson models. We evaluate predictions at excluded locations, assess spatial sensitivity and track local improvement across years. Finer rental detail is tested, not assumed to represent general traffic more faithfully.
+
+Three questions organise the comparison. \emph{RQ1}: which urban rhythms and spatial polarities recur across the two services, and what do their records actually measure? \emph{RQ2}: do citywide, endpoint and geometric features exhibit similar patterns of incremental value for traffic estimation? \emph{RQ3}: do those benefits persist across excluded locations and year, and across local and pooled summaries? Maps and spatial summaries address RQ1; held-out prediction experiments address RQ2--RQ3.
+
+The comparison preserves the observation differences. Four bicycle sites and hundreds of vehicle detectors cannot establish a controlled mode effect; their absolute errors are not a league table of predictability. The question is whether qualitative conclusions survive different supervision and measurement conditions. Source audits, matched contrasts and spatial exclusion provide the common logic; exceptions and uncertainty limits define its scope.
+
+For urban monitoring, this distinction changes how sharing records should be used. Recurring arrival and departure polarities can help identify where and when further observations would be useful. Agreement between services makes those patterns worth investigating, even when their users differ. It does not establish the volume of traffic on nearby streets. The comparison therefore connects a positive reading of urban activity with an explicit test of how far that reading can be extended.
+
+The rest of the paper is organized as follows. Section~II reviews related work and positions the study. Section~III interprets the city's rhythms through maps and temporal and trip distributions. Section~IV introduces the sensor networks and experimental design. Section~V presents the prediction results and discusses their meaning alongside the urban patterns. Section~VI concludes.
+
+\clearpage
+\section{Related Work and Analytical Position}
+\subsection{Service Activity Is Not General Traffic}
+Bike-sharing has evolved across operating generations and institutional arrangements \cite{shaheen2010}; reviews emphasise its service-specific users and use patterns \cite{fishman2016}. Car-sharing demand and operations are likewise connected through vehicle supply and availability \cite{jorge2013}. Spatial modelling of free-floating car-sharing further motivates attention to local context and alternative transport options \cite{becker2017}. These literatures motivate reading rental endpoints in relation to the city's spatial and temporal organisation.
+
+Nighttime bike-sharing research shows that temporal stratification can expose different spatial patterns \cite{yu2024}. Work on hourly sharing imbalances similarly identifies recurring sources and sinks \cite{song2026}. Such differences justify testing time-specific predictors, not automatically applying time-specific expansion factors to general traffic. Arrivals minus departures describe net recorded movements, but cannot measure available vehicles without opening inventories, maintenance and operator relocation records. Activity and balance maps therefore answer distinct descriptive questions. We use them to interpret the input source rather than claim that visually prominent cells are validated traffic corridors.
+
+\subsection{From Selective Observations to Count Estimation}
+Reviews and empirical comparisons examine bicycle-volume estimation from conventional and emerging observations \cite{bhowmick2023,kothuri2022,miah2023}. The closest methodological precedent is Kaiser et al.\ \cite{kaiser2025}, who combine sharing, crowdsourced activity, contextual inputs and counts in Berlin, with spatial validation and evaluation of local observations. We share their emphasis on extrapolation beyond counting stations. Our question is more specifically which sharing representation adds value beyond context, and whether that value persists across locations and years in both bicycle and motor-vehicle monitoring. The comparison is not an accuracy benchmark against Berlin, where inputs and observation conditions differ.
+
+Graph-based methods also address sparse bicycle observations \cite{gupta2025}, while work using Strava links estimated cycling volumes to infrastructure assessment \cite{tori2026}. These approaches differ in their inputs and validation targets. Recovering missing values of a selective activity source is not automatically equivalent to estimating all-cyclist passages. The distinction is especially important when drawing maps: geographical completeness of model output is not independent evidence of geographical accuracy. Our comparison keeps the held-out counter target explicit in both settings.
+
+Probe-vehicle volume estimation pursues a related objective for motor traffic \cite{eisinga2025}. Our distinction is observational: rental endpoints lack the route information available in trajectories. Even for bicycles, revealed route choice cannot generally be reduced to shortest distance \cite{broach2012}. We therefore test straight-line geometry as an additional predictor, not as a measured road crossing.
+
+\subsection{Spatial Detail and the Route-Observation Gap}
+Research on cycling route-choice heterogeneity, including e-bike use, further cautions against imposing one universal route rule \cite{lilas2025}. A nearby origin can connect to several roads, and a through trip can have both endpoints far from a counter. Car rentals introduce an additional temporal gap because collection and return do not identify when intermediate driving occurred. These mechanisms suggest why the relationship between local endpoints and passages could be unstable, but they do not prove the cause of any observed prediction error.
+
+The common feature ladder consequently separates three claims often conflated in data-fusion applications: citywide sharing may proxy common temporal variation; local endpoints may locate activity; endpoint geometry may approximate spatial connections. Increasing detail moves between these claims rather than simply providing more precise measurements of the same quantity. Matched additions within a learner reveal whether that extra representation is useful under the tested conditions.
+
+\subsection{Validation Targets and Inference Limits}
+OD estimation combines prior matrices and traffic constraints through established inverse methods \cite{vanzuylen1980,cascetta1984}; Bayesian approaches can incorporate assignment and route uncertainty \cite{hazelton2024}. A successful section-count prediction does not independently validate the OD movements generating it. Our target is directly observable held-out passages, while OD geometry enters only as an input.
+
+Bicycle-specific OD studies illustrate the additional modelling steps involved: gravity-based initial demand and path-flow estimation \cite{ryu2020}, or count-based updating with deterrence-function estimation \cite{melo2023}. They address a different inferential target from direct count prediction. We do not reconstruct total bicycle or motor-vehicle demand and then interpret count fit as proof of the inferred journeys. The endpoint source supplies predictors; independent counters supply the outcome.
+
+\subsection{Why a Cross-System Comparison Adds Evidence}
+Spatial exclusion matters because random temporal splits can retain the same place in training and testing. Subsequent-year testing then asks whether a learned association survives additional change. These are separate requirements, and neither is guaranteed by a large number of repeated observations. A gain relative to a weak learner can also disappear when the contextual baseline is strengthened; a pooled gain can hide local losses; near-zero detector totals can destabilise mean site percentages. We therefore retain multiple learners and aggregation levels.
+
+Our contribution is not a new prediction architecture. Relative to service-pattern studies \cite{yu2024,song2026}, we connect spatial description to independent traffic counts. Relative to volume-extrapolation studies \cite{kaiser2025,eisinga2025}, we compare citywide activity, endpoints and geometry in two traffic domains, distinguishing next-year transfer from persistent local benefit. The contribution is evidence that shared urban polarities coexist with similar estimation limits, not superior accuracy across datasets.
+
+\clearpage
+\section{City Rhythms and Data Analysis}
+\subsection{Sharing Volumes, Temporal Evolution and Trip Characteristics}
+The two sharing sources contain rental starts and returns in Bologna in 2023--2024, with timestamps and endpoint positions. Bicycle records also distinguish electric and mechanical vehicles; about 93\%{} of retained trips use electric bicycles. Recorded car kilometres are absent in 2024, so distance comparisons consistently use straight-line endpoint displacement, not route length. Rental duration is the interval between collection and return; for cars it can include stops and parking.
+
+Both cohorts require departures in the source year, endpoints inside latitude $44.40$--$44.60$ and longitude $11.20$--$11.50$, and finite duration of at least thirty seconds. Bicycle records additionally require a recognised type and at least 100 m displacement; plausible near-origin car returns are retained. After duplicate and validity checks, approximately 4.6 million bicycle rentals and 0.4 million car rentals remain (Table~\ref{tab:audit}).
+
+\begin{table}[t]
+\caption{Rental cohorts under their mode-appropriate rules. Outside-box records are excluded from the study, not necessarily erroneous.}
+\label{tab:audit}\centering\scriptsize
+\input{tables/audit}
+\end{table}
+
+The distributions pool 2023--2024 trips, with weekdays/weekends defined by departure calendar date. Bicycle durations use the source's valid-measurement subset (0.5--180 min and endpoint-based speed at most 45 km/h); car durations are uncapped. Counts and displacement use the full retained cohorts. Changes over time can reflect service availability or coverage as well as travel.
+
+Figure~\ref{fig:distributions}(a,e) first shows monthly rental activity from January 2023 to December 2024. Changes can also reflect availability and data coverage. Panels (b,f) then separate the daily rhythm by departure day, pooling both years. Both services have a stronger morning component on weekdays and more overnight activity at weekends. Between 06 and 10, bicycles account for 16.4\%{} of weekday departures but only 7.6\%{} of weekend departures; the corresponding car shares are 14.0\%{} and 9.5\%{}. Conversely, the 00--06 share rises from 8.5\%{} to 20.3\%{} for bicycles and from 9.1\%{} to 16.8\%{} for cars. Each curve is normalised within its day type, so these differences describe when rentals occur, not whether total weekend demand is higher.
+
+Thus both services shift from stronger weekday morning schedules towards more overnight weekend use, while afternoon/evening departures remain prominent. The pooled morning pattern therefore combines different weekday and weekend rhythms.
+
+\begin{figure*}[tp]
+\centering\includegraphics[width=\textwidth]{sharing-distributions}
+\caption{Sharing volumes and distributions: bike-sharing in the first row (a--d), car-sharing in the second (e--h). (a,e) Monthly retained rentals in 2023--2024, in thousands; missing months are not imputed as zero. Other columns pool both years: (b,f) hourly departure shares, normalised within each service/day type; (c,g) cumulative straight-line endpoint displacement, not route distance (0--20 km shown, all observations in the denominator); (d,h) cumulative duration on logarithmic axes with panel-specific ranges. Bicycle durations use the valid-measurement subset; car intervals are uncapped and can include stops. Weekday is Monday--Friday and weekend Saturday--Sunday by local departure date. Cumulative-curve legends report medians; curves use aggregate bins.}
+\label{fig:distributions}
+\end{figure*}
+
+Figure~\ref{fig:distributions}(c,d,g,h) shows a useful contrast with the hourly profiles. Within each service, weekday and weekend rentals differ much less in typical endpoint separation and duration than in timing. Median bicycle displacement is about 1.64 km on weekdays and 1.67 km at weekends; car medians are about 2.59 km and 2.53 km. Thus a later weekend rhythm does not imply a systematically greater geographical separation between collection and return. Car rentals have larger median endpoint separations, but this does not identify their route length.
+
+Median bicycle duration is about 10.3 minutes on weekdays and 10.8 at weekends; car medians are about 21.5 and 21.0 minutes. The curves nevertheless reveal different tails. Ninety-five percent of valid bicycle durations are within roughly 27--29 minutes, whereas the corresponding car thresholds are about eight hours on weekdays and sixteen at weekends. Those long car intervals can include parking or stops; they are not evidence of continuous driving. The similar medians therefore conceal an important difference in what a recorded rental interval means.
+
+The clearest weekday/weekend difference is therefore timing, not typical trip extent. Similar daily scales coexist with a different schedule of use.
+
+\subsection{Geographical Distribution of Sharing Activity}
+Figure~\ref{fig:activity-map} asks where the services are busiest. Rental departures and arrivals are pooled over 2023--2024 into common 500 m cells across four windows: 06--10, 10--15, 15--20 and 20--06. For arrivals $A$, departures $D$ and valid observation hours $H$, activity is $(A+D)/H$. It measures endpoint turnover, not traffic along the streets joining those endpoints. Cells below 200 bicycle or fifty car endpoint events are left uncoloured rather than interpreted as inactive.
+
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{sharing-activity}
+\caption{Sharing intensity over a common geographical background. Top: bike-sharing; bottom: car-sharing. Columns: 06--10, 10--15, 15--20, and 20--06. Colour is arrivals plus departures per valid hour in each 500 m cell. Each row uses one linear colour scale across its four windows; row scales differ because service volumes differ. Bicycle/car cells below 200/50 endpoint events are uncoloured, not zero. Source dates and overnight conventions are not matched across modes. Background: \copyright{} OpenStreetMap contributors, \url{https://www.openstreetmap.org/copyright}.}
+\label{fig:activity-map}
+\end{figure*}
+
+Both services concentrate activity in the central urban area, with additional concentrations extending into surrounding neighbourhoods. The maps describe a shared urban focus without implying equal coverage: bicycle rentals are far more numerous, and each service has its own colour scale. Colours can therefore compare time windows within a service, but not absolute volumes between services.
+
+The centre remains active beyond the morning window, and both services reach their highest cell-level activity rate in 15--20. This is a pattern of sustained turnover rather than a city that becomes inactive after morning arrivals. The intensity maps alone, however, cannot say whether an active area mainly receives rentals or sends them out. That directional distinction requires the net balances in the next figure.
+
+\subsection{Net Balances and Daily Urban Polarities}
+Figure~\ref{fig:balance-map} asks which areas receive more rentals than they send out. The normalised balance is $(A-D)/(A+D)$: red indicates net arrivals and blue net departures, on a common scale for both services. A pale central cell can still be busy if arrivals and departures offset; a strongly coloured outer cell can have relatively few events. Balance describes the polarity of recorded movements, not their volume or the stock of available vehicles.
+
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{sharing-balance}
+\caption{Normalised arrival--departure balance, $(A-D)/(A+D)$, using the same grids, dates, windows and suppression rules as Fig.~\ref{fig:activity-map}. All panels share the $[-1,1]$ scale: red indicates net arrivals, blue net departures. The map distinguishes the sign of recorded rental flows from their intensity; it measures neither available vehicles nor street crossings. Background: \copyright{} OpenStreetMap contributors, \url{https://www.openstreetmap.org/copyright}.}
+\label{fig:balance-map}
+\end{figure*}
+
+In 06--10, many outer cells show net departures, whereas the centre and selected northern/northwestern cells show net arrivals. This is compatible with movement towards central and northern activity areas. The Fiera and airport sectors provide geographical reference points for the northern and northwestern parts of the map.
+
+Table~\ref{tab:urban-rhythms} distinguishes the strength of these tendencies: the centre has positive balances and the outer remainder strongly negative ones. The northern arrival surplus is clearer for cars ($+10.4\%{}$) than bicycles ($+0.9\%{}$). The north is not one uniform destination; local polarities can offset. The centre comprises cell centres within 1.5 km of $(44.4949,11.3426)$; the northern band comprises other cells at least 1.5 km north of that point; the remainder contains the other map cells. Regional balances sum arrivals and departures before normalising, without the display threshold. Reversals and correlations use common displayed cells.
+
+\begin{table}[t]
+\caption{Regional rental balance, $100(A-D)/(A+D)$. Positive values mean net arrivals. Geometric zones summarise the mapped pattern. All recorded viewport cells enter the sums.}
+\label{tab:urban-rhythms}\centering\footnotesize
+\input{tables/urban-rhythms}
+\end{table}
+
+In 10--15, the centre remains active but arrivals and departures become more balanced. Median absolute cell balance falls from 0.34 to 0.08 for bicycles and from 0.31 to 0.05 for cars. A paler balance map therefore means weaker directional asymmetry, not absent movement. Cross-service balance correlation is close to zero at midday: the same places can be busy without receiving and sending rentals in identical proportions.
+
+In 15--20, the central and northern balances turn negative and the outer remainder positive (Table~\ref{tab:urban-rhythms}), compatible with a movement back towards outer destinations. Read alongside Fig.~\ref{fig:activity-map}, this departure surplus does not mean an inactive centre: high turnover and net outward movement coexist.
+
+This reversal is widespread: balance changes sign in 129 of 153 comparable bicycle cells (84.3\%{}) and 170 of 229 car cells (74.2\%{}). It describes a shared rhythm, not identified return journeys by the same people or direct OD flows between the broad zones.
+
+The 20--06 column combines evening and early morning, and northern regional balances become positive again. Later hours are therefore not one uniform outward movement. Bicycle nights are continuous and assigned to the preceding evening; car panels combine low-hour bins on one calendar date. This limits overnight comparisons, but not the morning/afternoon reversal. The broad bin should not be interpreted as a single return-home period.
+
+Morning balance correlation is 0.75 across 152 common displayed cells and 0.49 across 158 cells in late afternoon. The evidence answers RQ1 positively: different services reveal related urban polarities and weekend timing shifts. The separate question of general-traffic estimation requires the experiments below.
+
+\section{Sensor Networks and Experimental Design}
+\subsection{Where General Traffic Is Observed}
+Independent municipal sensors provide the reference against which we test the sharing information. Bicycle counters record directional passages of all bicycles, not only shared bicycles \cite{bolognaCounters}; road detectors count motor vehicles, not just shared cars or passenger cars \cite{bolognaLoops}. These are counts at specific street sections, not numbers of unique travellers or citywide journeys.
+
+Figure~\ref{fig:counters} locates the sensors used in the experiments. The bicycle network contributes four locations: Ercolani, Parri, Sabotino and San Donato. They provide a small set of observations around the central city, rather than coverage of every neighbourhood. Paired devices and both directions are treated as one location when separating training and testing. These four sites have at least sixty observed service days in 2023 after consistency and complete-period checks. Six locations are excluded from the study cohort independently of prediction error; of the seven remaining groups, four meet this coverage requirement.
+
+The motor-vehicle network is much denser: 752 eligible devices in 2023, distributed over 63 occupied square-kilometre blocks. Several instruments can belong to the same street area, so 752 devices do not represent 752 independent locations. Eligibility requires at least 180 usable dates in 2023 and stable station coordinates. A usable period must have official recording completeness of 100\%{} in every constituent hour \cite{bolognaAccuracy}. In 2024, 744 of these devices remain observed, including 736 with positive totals. Recording completeness does not guarantee that an instrument is physically correct; the bicycle archive has no equivalent official completeness flag.
+
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{counter-network}
+\caption{Observation networks and spatial validation units, with the same geographical extent and scale: (a) four bicycle-counter locations; (b) 752 motor-vehicle devices (orange circles), 246 proximity-group centres (blue crosses) and 63 occupied 1 km blocks (blue outlines). Blocks are assigned using group centres. Counts and predictions remain device-specific; grouping defines validation and resampling units. Several devices overlap. The maps show the experimental networks, not every municipal sensor.}
+\label{fig:counters}
+\end{figure*}
+
+\subsection{What We Predict and How We Test It}
+The experiment asks whether sharing records help estimate general traffic at a street location where no count data are used for training. We predict the number of bicycle or motor-vehicle passages during a complete day or night period. Models estimate mean hourly flow and multiply it by the observed period length; partial counter periods are not expanded. Day is 06--23. Bicycle nights are assigned to the preceding evening, whereas vehicle nights combine early and late hours of the same calendar date.
+
+Training uses 2023 only. Bicycle tests leave out one entire location and train on the other three. Vehicle counts and predictions remain separate for each device: they are not summed into area totals. For spatial validation, links between devices within 100 m define 246 connected groups. Each group is assigned by its centre to a 1 km block, producing 63 occupied blocks, which enter five spatial folds (Fig.~\ref{fig:counters}b). Training also excludes devices within 250 m of a test device. Each fitted model is tested at excluded locations in 2023 and again in 2024 without refitting. The first test concerns unobserved places within the training year; the second asks whether that relationship survives into the following year.
+
+Sharing activity and weather are observed for the period being estimated. This is therefore gap filling in a spatial monitoring network, not forecasting future traffic. Bicycle and vehicle models are fitted separately, and all input comparisons within each experiment use identical test observations. Their absolute errors are not a controlled comparison between transport modes.
+
+\subsection{Which Information and Models Are Compared}
+Four cumulative input sets test whether increasingly local sharing information adds value:
+\begin{enumerate}
+\item \emph{Context}: sensor position and distance from the centre, weekday, season, day/night, temperature and precipitation. Bicycle models also use direction; vehicle models include holidays.
+\item \emph{Citywide}: Context plus sharing departures per hour across the study area, describing the overall rhythm of service use. Bicycle models also include the electric-bicycle fraction.
+\item \emph{Endpoints}: Citywide plus sharing departures and returns per hour within 500 m of the sensor.
+\item \emph{Geometry}: Endpoints plus the rate of straight lines joining rental origins and destinations that pass within 100 or 250 m of the sensor. These lines are spatial proxies, not reconstructed routes or verified sensor crossings.
+\end{enumerate}
+Bicycle geometry distinguishes lines oriented towards and away from the centre; vehicle geometry is unsigned. Returns follow their own timestamps, while geometry follows departure time. These conventions preserve what the records actually observe without claiming to locate intermediate travel.
+
+Each input set is tested with two models: regularised Poisson regression, which provides a relatively simple count relationship, and gradient boosting with Poisson loss, which can capture nonlinear relationships. Settings remain fixed across input sets and preprocessing uses training data only. A separate simple reference, \emph{uniform chord expansion}, multiplies the 250 m geometry proxy by a single factor calibrated on training counts. It tests the idea that sharing movements could simply be scaled up to represent all traffic. Fitting details and parameter values are provided in the accompanying code.
+
+\subsection{How We Read the Results}
+The main measure is pooled weighted absolute percentage error (WAPE): total absolute prediction error divided by total observed passages. Lower is better; a value of 40\%{} means that absolute errors sum to 40\%{} of the observed count. Busy locations carry more weight. We compare every sharing model with the same model using Context alone, reporting differences in percentage points; negative differences favour sharing.
+
+We also ask whether individual locations improve in both years, rather than only whether the network total improves. This uses the four bicycle sites and 736 vehicle devices with positive totals in both years; ties count as no improvement. Available dates need not be identical across years. Sensitivity checks use 2,000 paired resamples of bicycle locations or vehicle spatial blocks, with predictions held fixed. They do not establish citywide uncertainty, especially with only four bicycle sites. Complete diagnostics remain in the reproducible outputs.
+
+\section{Results and Discussion}
+The results follow three questions: does sharing improve on context alone, does any advantage survive in 2024, and is that advantage shared across locations? The two experiments are read separately before drawing their common lesson.
+
+\subsection{What Is Useful: Temporal Proxy or Local Detail?}
+Table~\ref{tab:pooled} reports the numerical results; Fig.~\ref{fig:ladder} highlights their main pattern: adding more local sharing detail does not consistently improve traffic estimates. For bicycles, the strongest 2023 result uses Poisson regression with citywide activity. Nearby rental endpoints and straight-line geometry do not improve on this simpler representation. The useful information is primarily the overall rhythm of service use, rather than its fine geographical detail.
+
+\begin{table*}[t]
+\caption{Pooled WAPE (\%) for all primary configurations. Comparisons across columns do not control differences in targets, sites or validation design.}
+\label{tab:pooled}\centering\footnotesize
+\input{tables/pooled}
+\end{table*}
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{feature-ladder}
+\caption{Cumulative sharing inputs by target and learner. Lines identify test years; horizontal references show uniform chord expansion. Each panel uses its own vertical scale. These are within-experiment feature comparisons, not a ranking of modes.}
+\label{fig:ladder}
+\end{figure*}
+
+Geometry helps bicycle boosting relative to its own contextual baseline, but that model still performs worse than Poisson regression without sharing. A benefit within one model therefore need not identify the best estimator. Learner choice matters at least as much as adding rental detail.
+
+For motor vehicles, sharing gains are small. Local endpoints and geometry leave boosting predictions exactly unchanged, while Poisson estimates change only slightly. The features are available, but greater spatial detail supplies little additional predictive value under these model settings.
+
+The answer to RQ2 is therefore conditional: citywide activity can supply a useful temporal proxy and geometry can help a particular model, but neither experiment shows a consistently improving progression from coarse to local inputs.
+
+\subsection{Does a Within-Year Advantage Survive?}
+The following-year test weakens the case for a stable sharing advantage. Citywide activity no longer improves the pooled result for either bicycle Poisson regression or the vehicle models. What helps at excluded locations in the training year does not necessarily remain useful at those locations in a later year.
+
+
+An exception is bicycle boosting with Geometry: it retains an advantage over its own Context model, although it remains worse than Poisson without sharing. The finding is not that every benefit disappears, but that no general, learner-independent advantage transfers.
+
+Uniform chord expansion reinforces this conclusion. It does not match the strongest contextual alternatives and performs worse in 2024 than in 2023 for both traffic domains, particularly bicycles. A factor calibrated to match training totals does not provide a stable conversion from sharing movements to general passages. Simply scaling up rental geometry is therefore not a dependable substitute for traffic monitoring.
+
+Sharing activity is observed in the period being estimated, so deterioration is not caused by missing future inputs. Changes in service use, availability, coverage or traffic could all matter; the experiment does not identify which mechanism drives the loss of transferability.
+
+\subsection{Persistent Local Benefit Need Not Mean Pooled Benefit}
+Figure~\ref{fig:persistence} shows why pooled performance is only part of the story. Bicycle Poisson with Citywide inputs improves at three of the four sites in both years, even though its pooled result deteriorates relative to Context in 2024. The remaining site's loss outweighs the gains elsewhere. A worse overall result does not mean that every local relationship has failed.
+
+\begin{figure*}[t]
+\centering\includegraphics[width=\textwidth]{persistence}
+\caption{Improvement persistence relative to each learner's Context model. Percentages use sites with positive totals in both years: four bicycle sites and 736 vehicle devices. Ties count as no improvement. The much smaller bicycle denominator must be retained when interpreting apparently large percentages.}
+\label{fig:persistence}
+\end{figure*}
+
+For motor vehicles, improvements are uneven across the network and often occur in only one year. Persistent gains concern a minority of devices, and local endpoints or geometry do not make them widespread. Conversely, bicycle Geometry boosting retains a pooled advantage while improving consistently at only half the sites. RQ3 therefore has two distinct answers: stability across years and stability across places must both be checked.
+
+Sensor quality adds a further caution. Some vehicle devices report almost no traffic despite complete recording periods, making individual percentage errors unstable. Pooled error avoids division by those small totals but weights busy locations more heavily and cannot repair faulty observations. Network accuracy and persistent local benefit should be read together.
+
+\subsection{Converging Limits across Different Systems}
+The central qualitative result is the coexistence of shared urban rhythms and limited traffic-estimation transfer. Both services reveal where and when rental activity concentrates, yet neither offers a reliably improving path from citywide indicators to local traffic estimates. The common lesson is not that sharing is useless, but that descriptive detail and predictive reliability are different properties.
+
+There is a plausible observation gap: through traffic may have neither endpoint near a sensor, nearby rentals may use parallel streets, and straight lines omit detours and access restrictions. Car-rental intervals also do not locate intermediate driving in time. These are possible explanations, not established causes of the errors. Verified routes and road attributes would be needed to test them.
+
+The scope remains specific: fixed model settings do not establish the best achievable accuracy, four selected bicycle locations cannot validate a citywide map, and more vehicle devices do not remove recording problems. Differences in targets and network coverage also prevent interpreting absolute errors as an intrinsic difference between modes.
+
+For practice, any extension from sharing activity to wider traffic should demonstrate improvement over a credible contextual baseline at excluded locations and in another year, checking both total accuracy and persistent local benefit. A coarse citywide signal may be more useful than elaborate local geometry; where those checks fail, the sharing map should remain a service map rather than an unsupported traffic map.
+
+\section{Conclusion}
+\emph{RQ1: urban rhythms and observation meaning.} Both services reveal morning arrival polarities in central and northern areas and a late-afternoon reversal towards outer areas. Balance sign reverses in 84.3\%{} of common displayed bicycle cells and 74.2\%{} of car cells. Weekend activity shifts towards the night, while typical displacement and duration remain similar to weekdays.
+
+\emph{RQ2: incremental value.} The strongest 2023 bicycle result uses Citywide Poisson inputs, while vehicle gains are small. Local endpoints and chord geometry do not produce a consistently improving feature ladder. Learner choice can matter more than adding sharing detail.
+
+\emph{RQ3: transfer and aggregation.} The citywide pooled advantages do not persist in 2024, although bicycle Geometry boosting retains an advantage over its own weaker baseline. Three bicycle sites improve with Citywide Poisson in both years despite aggregate deterioration. Stable local improvement, low pooled error and reliable measurement are separate requirements.
+
+The contribution is twofold: shared daily polarities emerge from different sharing systems, yet those same sources encounter similar limits when used to estimate wider traffic. Reading the city's rhythms and predicting its general traffic are distinct achievements. Recognising the first does not justify assuming the second; a lack of stable predictive benefit does not erase the descriptive value of sharing observations.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}

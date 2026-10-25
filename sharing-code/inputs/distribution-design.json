@@ -1,0 +1,62 @@
+{
+  "years": [
+    2023,
+    2024
+  ],
+  "pooling": "All retained trips pooled, not equal-year averaging",
+  "daytype": "Departure calendar date: Monday-Friday / Saturday-Sunday; holidays not reclassified",
+  "hourly": "Reported local departure hour; normalised within mode/daytype after pooling years",
+  "monthly": "Retained departures by local calendar month; absent months not imputed as zero",
+  "distance": "Straight-line endpoint displacement in km, not recorded route distance",
+  "duration": {
+    "bike": "Source valid-duration subset: 0.5-180 min and endpoint speed <=45 km/h",
+    "car": "Retained rental duration, at least 0.5 min; no upper cap; may include stops"
+  },
+  "distance_cohort": {
+    "bike": "Retained cohort, endpoint displacement >=100 m",
+    "car": "Retained cohort including near-origin returns"
+  },
+  "privacy": "Only start, duration/seconds and chord/displacement read; no IDs or coordinates",
+  "sources": [
+    {
+      "source": "bike-sharing-code/code/dati_esterni/trips-2023.parquet",
+      "sha256": "80d2daf9facd4cb1eb241f59602b35996931970f972ae2a07b84c93f0042be06",
+      "snapshot": null,
+      "access": "Read-only scalar projection; no row-level snapshot"
+    },
+    {
+      "source": "bike-sharing-code/code/dati_esterni/trips-2024.parquet",
+      "sha256": "a9aaba71b5593d16e022a0be8a9c625f0e0da2bf645af82e7625599ba2bee241",
+      "snapshot": null,
+      "access": "Read-only scalar projection; no row-level snapshot"
+    },
+    {
+      "source": "car-sharing-code/code/dati_esterni/cars/trips.parquet",
+      "sha256": "0f02cac99ca022a6277d8f2821ddd71ff47078081f68c3b7b6eae3f75f258267",
+      "snapshot": null,
+      "access": "Read-only scalar projection; no row-level snapshot"
+    }
+  ],
+  "cohorts": [
+    {
+      "mode": "bike",
+      "year": 2023,
+      "retained": 1731828
+    },
+    {
+      "mode": "bike",
+      "year": 2024,
+      "retained": 2842801
+    },
+    {
+      "mode": "car",
+      "year": 2023,
+      "retained": 195076
+    },
+    {
+      "mode": "car",
+      "year": 2024,
+      "retained": 216165
+    }
+  ]
+}

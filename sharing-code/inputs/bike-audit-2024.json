@@ -1,0 +1,31 @@
+{
+  "year": 2024,
+  "cohort_version": "endpoint-min30-v3",
+  "minimum_ride_seconds": 30,
+  "raw": 3106337,
+  "exact_duplicates": 1,
+  "labels": {
+    "ebike": 2921266,
+    "bike": 185071
+  },
+  "flags_nonexclusive": {
+    "invalid_time": 0,
+    "duration_outside_0_5_180_min": 76068,
+    "duration_below_30_seconds": 75153,
+    "missing_duration": 0,
+    "outside_analysis_box": 139,
+    "distance_outside_0_50_km": 130,
+    "unknown_type": 0,
+    "chord_speed_over_45_kmh": 1076,
+    "chord_under_100m": 262369
+  },
+  "retained": 2842801,
+  "endpoint_valid_before_duration": 2843833,
+  "removed_by_duration_from_endpoint_cohort": 1032,
+  "start_min": "2024-01-01 00:00:37",
+  "start_max": "2024-12-31 23:59:35",
+  "valid_duration_retained": 2841962,
+  "valid_distance_retained": 2842724,
+  "zero_duration_all_unique": 0,
+  "sha256": "ed43828e70027b0037fca8e8fc392e63bed83ae0bcf5522bcd2b0aad34452300"
+}

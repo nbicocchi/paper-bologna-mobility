@@ -1,0 +1,15 @@
+{
+  "unstable_sites_over_100m": [
+    74,
+    188,
+    259,
+    828
+  ],
+  "eligibility": "At least 180 distinct valid dates in 2023; no 2024 performance selection",
+  "sites": 752,
+  "clusters": 246,
+  "blocks": 63,
+  "periods": 654832,
+  "quality": "Every source hour must have official accuracy exactly 100 percent",
+  "time": "Calendar-date day 06--23 and night 00--06 plus 23--24; DST change dates excluded"
+}

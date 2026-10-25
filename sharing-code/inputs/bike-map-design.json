@@ -1,0 +1,75 @@
+{
+  "years": [
+    2023,
+    2024
+  ],
+  "cell_km": 0.5,
+  "display_minimum_activity": 200,
+  "local_extent_km": [
+    -7,
+    8,
+    -5,
+    6
+  ],
+  "activity": "(arrivals + departures) / valid period hours",
+  "balance": "(arrivals - departures) / (arrivals + departures)",
+  "activity_scale": [
+    0,
+    48.515142857142855
+  ],
+  "balance_scale": [
+    -1,
+    0,
+    1
+  ],
+  "panels": [
+    {
+      "block": 0,
+      "label": "06:00\u201310:00",
+      "hours": 2800,
+      "periods": 700,
+      "departures": 635158,
+      "arrivals": 603132,
+      "displayed_cells": 153
+    },
+    {
+      "block": 1,
+      "label": "10:00\u201315:00",
+      "hours": 3500,
+      "periods": 700,
+      "departures": 1051580,
+      "arrivals": 1038005,
+      "displayed_cells": 156
+    },
+    {
+      "block": 2,
+      "label": "15:00\u201320:00",
+      "hours": 3500,
+      "periods": 700,
+      "departures": 1430914,
+      "arrivals": 1414537,
+      "displayed_cells": 161
+    },
+    {
+      "block": 3,
+      "label": "Night (20:00\u201306:00)",
+      "hours": 6989,
+      "periods": 699,
+      "departures": 1451154,
+      "arrivals": 1513112,
+      "displayed_cells": 157
+    }
+  ],
+  "counter_sites": [
+    "Ercolani",
+    "Manzi",
+    "Parri",
+    "Sabotino",
+    "San Donato",
+    "Sturzo",
+    "Zanardi"
+  ],
+  "period_selection": "Complete 06\u201310, 10\u201315, 15\u201320, 20\u201306 windows; all constituent hours must be within 2023\u20132024 and have usable sharing coverage. Same selection for both maps.",
+  "date_convention": "Service date starts at 06:00; overnight 20\u201306 belongs to the evening date.",
+  "event_assignment": "Each departure uses its start time; each arrival its return time."
+}
