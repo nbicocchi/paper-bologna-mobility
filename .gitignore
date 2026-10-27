@@ -60,6 +60,8 @@ dist/
 *.run.xml
 *.xdv
 *.dvi
+*.fff
+*.ttt
 
 # File locali di editor e sistema operativo
 .idea/
