@@ -1,27 +1,56 @@
-\documentclass[journal,10pt]{IEEEtran}
+\documentclass[]{interact}
+
+\usepackage{epstopdf}% To incorporate .eps illustrations using PDFLaTeX, etc.
+\usepackage[caption=false]{subfig}% Support for small, `sub' figures and tables
+
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{amsmath,amssymb}
-\usepackage{graphicx,booktabs,array}
-\usepackage{cite,xurl}
+\usepackage{array}
+\usepackage{xurl}
 \usepackage[hidelinks]{hyperref}
+
+\usepackage{apacite}% Citation support using apacite.sty for APA reference style
+
+\usepackage[nolists,tablesfirst]{endfloat}% Move tables and figures to the end of the document
+\usepackage{etoolbox}% For \gappto used by figure captions list
+
+% Keep figure captions in one place and print them as a list after the figures.
+\newcommand{\FigureCaptions}{}
+%TC:macro \FigureCaption [ignore,otherword]
+%TC:floatinclude \FigureCaption [ignore,otherword]
+\newcommand{\FigureCaption}[2]{%
+  \refstepcounter{figure}\label{#1}%
+  \par\smallskip\noindent{\footnotesize Figure~\thefigure.}\par
+  \gappto\FigureCaptions{\item[Figure~\ref{#1}.] #2\par}%
+}
+\AtEndDocument{%
+  \clearpage
+  \section*{Figure captions}
+  \begin{description}
+    \FigureCaptions
+  \end{description}
+}
+
 \graphicspath{{figures/}}
 \input{tables/recovery-numbers}
 \title{Measuring Post-Pandemic Road Traffic Recovery: Volume, Temporal Composition, and Observation-Network Sensitivity}
-\author{}
-\markboth{Measuring Post-Pandemic Road Traffic Recovery}{Measuring Post-Pandemic Road Traffic Recovery}
+\author{
+\name{Nicola~Bicocchi\textsuperscript{a}\thanks{CONTACT Nicola Bicocchi. Email: \href{mailto:nicola.bicocchi@unimore.it}{nicola.bicocchi@unimore.it}}, Marcello~Pietri\textsuperscript{b}, and Marco~Mamei\textsuperscript{b}}
+\affil{\textsuperscript{a}Department of Engineering ``Enzo Ferrari'', University of Modena and Reggio Emilia, Modena, Italy; \textsuperscript{b}Department of Sciences and Methods for Engineering, University of Modena and Reggio Emilia, Reggio Emilia, Italy}
+}
 \begin{document}
+\articletype{Research Article}
 \maketitle
 
 \begin{abstract}
-Longitudinal traffic observations provide valuable information for understanding how urban mobility evolves after major disruptions. This paper presents a data-driven framework to assess post-pandemic road traffic recovery by distinguishing changes in volume, hourly composition, and observation-network coverage. We evaluate the framework through a real-world use case using hourly motor-vehicle counts from 2019--2025, together with official recording-completeness records. We conduct extensive data-quality checks and construct a balanced panel of \PanelSites{} detectors with stable identities, fully recorded days, and coverage in every monthly weekday/weekend stratum. Using equal-month and fixed weekday/weekend weights, the traffic volume index rises from \IndexTwenty{} in 2020 to \IndexTwentyThree{} in 2023, before falling to \IndexTwentyFive{} in 2025, relative to a 2019 reference of 100. Furthermore, we use broader pairwise panels to assess sensitivity to detector retention. By 2025, hourly composition is closer to its pre-pandemic distribution than volume is to its reference level, and the morning share is not persistently depressed. These findings reveal incomplete and non-monotonic volume recovery at the observed locations. The framework supports interpreting recovery through complementary measures while accounting for changes in the observation network; the uneven detector coverage does not support citywide generalisation or causal attribution to the pandemic.
+Longitudinal traffic observations show how urban mobility evolves after major disruptions. This paper presents a data-driven framework to assess post-pandemic road traffic recovery by distinguishing changes in volume, hourly composition, and observation-network coverage. We evaluate it using hourly motor-vehicle counts from Bologna, Italy, 2019--2025, with official recording-completeness records. We build a balanced panel of 70 detectors with stable identities, fully recorded days, and coverage in every monthly weekday/weekend stratum. With equal-month and fixed weekday/weekend weights, the volume index rises from 76.3 in 2020 to 94.1 in 2023, then falls to 89.3 in 2025 (2019 = 100). Pairwise panels confirm sensitivity to detector retention. By 2025, hourly composition is closer to its pre-pandemic distribution than volume is to its reference level, and the morning share is not persistently depressed. Recovery is incomplete and non-monotonic. The framework supports interpreting recovery through complementary measures while accounting for observation-network changes; uneven coverage does not support citywide generalisation or causal attribution.
 \end{abstract}
-\begin{IEEEkeywords}
+\begin{keywords}
 COVID-19, traffic recovery, longitudinal traffic counts, pre-pandemic baseline, temporal composition, observation networks.
-\end{IEEEkeywords}
+\end{keywords}
 
 \section{Introduction}
-\IEEEPARstart{R}{eturning} to pre-pandemic traffic levels is an intuitive description of recovery, but measuring it requires several distinctions. A rebound from the lockdown trough does not establish a return to the pre-pandemic level. Restored annual volume does not establish restored morning peaks, weekend activity, or traffic distribution across streets. Changes in the number of functioning detectors can also produce an apparent recovery without increased traffic at comparable locations.
+Returning to pre-pandemic traffic levels is an intuitive description of recovery, but measuring it requires several distinctions. A rebound from the lockdown trough does not establish a return to the pre-pandemic level. Restored annual volume does not establish restored morning peaks, weekend activity, or traffic distribution across streets. Changes in the number of functioning detectors can also produce an apparent recovery without increased traffic at comparable locations.
 
 Reviews document diverse transport responses to the pandemic \cite{benita2021,abdul2022}. For planning, it matters whether earlier patterns have returned or continue to change. Lower traffic volume can retain its previous daily rhythm, while an unchanged total can be distributed differently across hours. Neither observation alone identifies teleworking, modal shift, congestion, or economic recovery.
 
@@ -33,7 +62,7 @@ Three questions organise the analysis. \emph{RQ1}: how does calendar-standardise
 
 The analysis combines a fixed seven-year panel with pairwise panels linking 2019 to each later year. All retained days must be fully recorded. Annual and monthly coverage requirements balance longitudinal comparability against detector retention, with selection based on observation availability rather than recovery outcomes. Alternative coverage thresholds, panel membership and aggregation weights provide sensitivity checks.
 
-The rest of the paper is organized as follows. Section~II reviews related work on recovery measurement. Section~III introduces the case study and observation audit. Section~IV defines the recovery measures and analysis design. Section~V presents the results. Section~VI discusses their interpretation and limitations, and Section~VII concludes.
+The rest of the paper is organised as follows. Section~II reviews related work on recovery measurement. Section~III introduces the case study and observation audit. Section~IV defines the recovery measures and analysis design. Section~V presents the results. Section~VI discusses their interpretation and limitations, and Section~VII concludes.
 
 \section{Related Work}
 \subsection{Reference Levels and Calendar Alignment}
@@ -118,8 +147,7 @@ These rules retain \PanelSites{} detectors in \PanelBlocks{} occupied 1 km block
 
 \begin{figure}[!t]
 \centering\includegraphics[width=\columnwidth]{recovery-network}
-\caption{Accepted seven-year detectors (blue, 70 stations) relative to all other source stations (grey, 837) in the analytical box. The overall network is the union of station positions in the 2019--2025 source files after basic active-loop, identity and position checks, not a claim that all stations operated simultaneously. Counts refer to distinct stations; nearby symbols may overlap.}
-\label{fig:network}
+\FigureCaption{fig:network}{Accepted seven-year detectors (blue, 70 stations) relative to all other source stations (grey, 837) in the analytical box. The overall network is the union of station positions in the 2019--2025 source files after basic active-loop, identity and position checks, not a claim that all stations operated simultaneously. Counts refer to distinct stations; nearby symbols may overlap.}
 \end{figure}
 
 \section{Recovery Measures and Analysis Design}
@@ -171,8 +199,7 @@ The fixed panel shows a large initial disruption followed by a substantial but i
 
 \begin{figure*}[t]
 \centering\includegraphics[width=\textwidth]{recovery-monthly}
-\caption{Monthly volume relative to the same month of 2019, using the fixed detector panel and fixed weekday/weekend weights. Shading marks March--May 2020 as a visual reference, not an estimated intervention boundary. Values describe observed corridors, not total city travel.}
-\label{fig:monthly}
+\FigureCaption{fig:monthly}{Monthly volume relative to the same month of 2019, using the fixed detector panel and fixed weekday/weekend weights. Shading marks March--May 2020 as a visual reference, not an estimated intervention boundary. Values describe observed corridors, not total city travel.}
 \end{figure*}
 
 The annual index reaches \IndexTwentyThree{} in 2023, then declines to \IndexTwentyFour{} in 2024 and \IndexTwentyFive{} in 2025. Recovery is therefore not a monotonic return to 100. The 2025 volume deficit is approximately 10.7\%{} of the standardised 2019 level. The spatial-resampling interval for the 2025 index is approximately 84.9--93.8; it does not extend inference beyond the observed corridors.
@@ -186,8 +213,7 @@ Weekday and weekend indices differ on the same panel (Fig.~\ref{fig:annual}). In
 
 \begin{figure*}[t]
 \centering\includegraphics[width=\textwidth]{recovery-annual}
-\caption{Left: annual ratio-of-sums index and median detector ratio. Error bars are spatial-block percentile intervals, not population confidence bounds. Right: separately standardised weekday and weekend indices on the same detector panel.}
-\label{fig:annual}
+\FigureCaption{fig:annual}{Left: annual ratio-of-sums index and median detector ratio. Error bars are spatial-block percentile intervals, not population confidence bounds. Right: separately standardised weekday and weekend indices on the same detector panel.}
 \end{figure*}
 
 In 2025, the weekday morning-window index is 90.3, compared with 88.3 in the evening, 91.8 at midday, and 88.9 during 00--06 (Table~\ref{tab:windows}). Morning volume remains below its 2019 level, but its share of weekday detections is slightly higher, by 0.09 percentage points. The evening share falls by 0.23 percentage points, while the midday share rises by 0.82 percentage points. Thus, lower volume coexists with substantial retention of the 2019 within-day pattern (Fig.~\ref{fig:hourly}). The morning-volume deficit does not, in this case, indicate a persistently reduced morning share.
@@ -200,8 +226,7 @@ In 2025, the weekday morning-window index is 90.3, compared with 88.3 in the eve
 
 \begin{figure*}[t]
 \centering\includegraphics[width=\textwidth]{recovery-hourly}
-\caption{Weekday hourly levels (left) and normalised shares (right) for selected years, with equal-month averaging. For each detector, all hours use the same fully recorded days. Similar shares do not imply restored volume or identify trip purposes.}
-\label{fig:hourly}
+\FigureCaption{fig:hourly}{Weekday hourly levels (left) and normalised shares (right) for selected years, with equal-month averaging. For each detector, all hours use the same fully recorded days. Similar shares do not imply restored volume or identify trip purposes.}
 \end{figure*}
 
 The aggregate hourly-share distances from 2019 also decrease. Weekday Jensen--Shannon distance is approximately 0.050 in 2021 and 0.018 in 2025; the corresponding weekend distances are approximately 0.066 and 0.016. Total variation in 2025 is approximately 0.017 on weekdays and 0.015 at weekends. These small compositional distances coexist with volume indices well below 100, indicating that broad temporal composition is closer to its reference than volume. Aggregation may nevertheless conceal offsetting detector-level changes, and hourly bins cannot reveal changes in sharper subhourly peaks.
@@ -211,8 +236,7 @@ The median detector ratio in 2025 is 89.1, close to the ratio-of-sums index, wit
 
 \begin{figure*}[t]
 \centering\includegraphics[width=\textwidth]{recovery-heterogeneity}
-\caption{Left: fixed-panel positions coloured by the 2025/2019 detector index; grey dots show the wider source network. Colour limits are clipped at 50 and 150 only for display. Right: empirical distribution of uncapped detector indices. Uneven spatial coverage limits geographical interpretation.}
-\label{fig:spatial}
+\FigureCaption{fig:spatial}{Left: fixed-panel positions coloured by the 2025/2019 detector index; grey dots show the wider source network. Colour limits are clipped at 50 and 150 only for display. Right: empirical distribution of uncapped detector indices. Uneven spatial coverage limits geographical interpretation.}
 \end{figure*}
 
 The coverage checks yield similar 2025 indices despite differences in panel size (Table~\ref{tab:sensitivity}). Requiring ninety complete days per year retains 72 detectors and gives an index of 89.2, compared with 89.3 for the primary panel. Requiring 180 days retains 42 detectors and gives 90.8; no panel satisfies the 240-day requirement. Excluding zero days and reapplying eligibility retains 67 primary-panel detectors and gives 89.2. This diagnostic changes both day selection and panel membership. It neither identifies individual zero observations as detector failures nor justifies their default exclusion.
@@ -229,8 +253,7 @@ Equal weighting of the 24 fixed-panel blocks gives a 2025 index of 88.6, compare
 
 \begin{figure}[t]
 \centering\includegraphics[width=\columnwidth]{recovery-sensitivity}
-\caption{Alternative coverage and weighting designs. Lines joining pairwise results are visual guides across different cohorts, not one longitudinal network. The 240-day design has no eligible sites and therefore no plotted trajectory.}
-\label{fig:sensitivity}
+\FigureCaption{fig:sensitivity}{Alternative coverage and weighting designs. Lines joining pairwise results are visual guides across different cohorts, not one longitudinal network. The 240-day design has no eligible sites and therefore no plotted trajectory.}
 \end{figure}
 
 By contrast, aggregation without fixed detectors or calendar exposure gives a substantially different account. Summing all complete detector-days would produce indices of approximately 107.5 in 2022 and 63.4 in 2024, compared with 92.4 and 92.6 in the primary panel. These archive-wide values do not establish a traffic overshoot followed by a comparable collapse, because both the set and number of measurements change. Dividing by available detector-days reduces exposure differences but still allows the mix of roads, dates and traffic levels to change. Neither shortcut replaces an explicitly defined longitudinal target.
@@ -265,6 +288,31 @@ The Bologna case shows why recovery estimates should be reported with their targ
 \section*{Data and Code Availability}
 The municipal count and recording-status sources are available under CC BY 4.0; the supplied count snapshots remain unchanged. The accompanying code freezes annual source metadata and completeness exports, audits detector-days, generates all numerical tables and figures, and tests audit reconciliation and index definitions. The reproducibility manifest records exact source URLs, hashes, software versions and derived-output hashes.
 
-\bibliographystyle{IEEEtran}
+\section*{Acknowledgment}
+This work is supported by project Support System for Sustainable Smart Cities - S4C, PG/2023/308180 (CUP E27G22000310007). The sharing data used in this study were shared within the project.
+
+\section*{Disclosure statement}
+The authors report no competing interests.
+
+\section*{Author contributions}
+Nicola Bicocchi: conceptualisation and formal analysis. Marcello Pietri: software. Marco Mamei: writing---original draft and writing---review and editing. All authors approved the final manuscript and agree to be accountable for all aspects of the work.
+
+\section*{Ethics statement}
+Ethical approval was not required for this study.
+
+\section*{Declaration of generative AI use}
+Generative AI was used only for proofreading and preparing submission materials, not for data analysis or interpretation.
+
+\section*{Data availability statement}
+The data and code supporting this study will be available after publication upon request to the corresponding author.
+
+\bibliographystyle{apacite}
 \bibliography{references}
+
+\section*{Biographical notes}
+Nicola Bicocchi is Associate Professor of Computer Science at the Department of Engineering ``Enzo Ferrari'', University of Modena and Reggio Emilia, Italy. He received his PhD in Information Engineering from the same university in 2009. His research focuses on autonomous adaptive systems, pervasive computing, digital twins, the Internet of Things, and smart mobility.
+
+Marcello Pietri is Assistant Professor at the Department of Sciences and Methods for Engineering (DISMI), University of Modena and Reggio Emilia, Italy. He received his MSc and PhD in ICT from the same university. His research interests include the Internet of Things, cloud-edge computing, digital twins, smart mobility, and AI-enabled cyber-physical systems.
+
+Marco Mamei is Full Professor of Computer Science at the Department of Sciences and Methods for Engineering (DISMI), University of Modena and Reggio Emilia, Italy. He received his PhD in Computer Science from the same university in 2004. His research concerns pervasive computing, geo-localised data analysis, the Internet of Things, and pervasive systems. He has held visiting positions at Telecom Italia Lab, Nokia Research Center, Harvard University, Cycorp Europe, and Yahoo Research.
 \end{document}
