@@ -8,13 +8,13 @@
 \graphicspath{{figures/}}
 \input{tables/recovery-numbers}
 \title{Measuring Post-Pandemic Road Traffic Recovery: Volume, Temporal Composition, and Observation-Network Sensitivity}
-\author{Working manuscript --- author information to be supplied\thanks{Version: October 25, 2026. Empirical case study: Bologna, Italy, 2019--2025. Recovery denotes a descriptive comparison with 2019, not a causal estimate of pandemic effects or a welfare objective.}}
-\markboth{Working Paper, October 2026}{Measuring Post-Pandemic Road Traffic Recovery}
+\author{}
+\markboth{Measuring Post-Pandemic Road Traffic Recovery}{Measuring Post-Pandemic Road Traffic Recovery}
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Whether urban road traffic has recovered after COVID-19 depends on the outcome, the pre-pandemic reference period, and the comparability of the observation network. We examine traffic volume, temporal composition, and variation across observed locations using hourly motor-vehicle counts from Bologna, Italy, for 2019--2025, linked to official recording-completeness records. A balanced panel requires stable detector identities, fully recorded days, minimum annual coverage, and observations in every monthly weekday/weekend stratum. These criteria retain \PanelSites{} detectors with geographically uneven coverage that cannot be assumed representative of the city. With equal-month and fixed weekday/weekend weights, the volume index rises from \IndexTwenty{} in 2020 to \IndexTwentyThree{} in 2023, then falls to \IndexTwentyFive{} in 2025 (2019 = 100). Broader pairwise panels separately assess sensitivity to detector retention. By 2025, hourly composition is much closer to its 2019 distribution than volume is to its reference level; the morning share is not persistently depressed. The results describe incomplete and non-monotonic volume recovery at observed locations, not a universal urban trajectory. The contribution is an integrated, reproducible assessment that distinguishes recovery of volume and temporal composition from changes in the observation network.
+Longitudinal traffic observations provide valuable information for understanding how urban mobility evolves after major disruptions. This paper presents a data-driven framework to assess post-pandemic road traffic recovery by distinguishing changes in volume, hourly composition, and observation-network coverage. We evaluate the framework through a real-world use case using hourly motor-vehicle counts from 2019--2025, together with official recording-completeness records. We conduct extensive data-quality checks and construct a balanced panel of \PanelSites{} detectors with stable identities, fully recorded days, and coverage in every monthly weekday/weekend stratum. Using equal-month and fixed weekday/weekend weights, the traffic volume index rises from \IndexTwenty{} in 2020 to \IndexTwentyThree{} in 2023, before falling to \IndexTwentyFive{} in 2025, relative to a 2019 reference of 100. Furthermore, we use broader pairwise panels to assess sensitivity to detector retention. By 2025, hourly composition is closer to its pre-pandemic distribution than volume is to its reference level, and the morning share is not persistently depressed. These findings reveal incomplete and non-monotonic volume recovery at the observed locations. The framework supports interpreting recovery through complementary measures while accounting for changes in the observation network; the uneven detector coverage does not support citywide generalisation or causal attribution to the pandemic.
 \end{abstract}
 \begin{IEEEkeywords}
 COVID-19, traffic recovery, longitudinal traffic counts, pre-pandemic baseline, temporal composition, observation networks.
@@ -53,12 +53,16 @@ Li, Zhao and Wang's Glasgow dataset spans October 2019--September 2023 and shows
 
 Dutch mobility-panel evidence likewise distinguishes returning activity from changed timing, motives and modes \cite{drift2022}. We separate hourly levels from shares, without claiming subhourly peak geometry or identified trip purposes.
 
+At the individual level, Ferrari and Mamei \cite{ferrari2011routines} use topic models to identify recurrent routines from Google Latitude mobility records. Although their study does not address pandemic recovery, it provides relevant methodological context for distinguishing recurring mobility patterns from aggregate activity levels. Our hourly profiles describe the timing of detector passages, not individual routines or the purposes behind them.
+
 \subsection{Changing Observation Networks and Uneven Recovery}
 Glasgow's refinement retains 470 of 1,033 sensors after spatial, temporal, interpolation and zero-series checks \cite{glasgow2025}. Cambridgeshire's June 2024 monitoring retains fourteen uninterrupted strategic-road sensors and warns that changing membership makes sums incomparable across reports \cite{cambridge2024}. A recovery percentage therefore belongs to a declared observation network, not automatically to a city.
 
 Spatially differentiated trajectories also appear in Chicago \cite{li2023} and, at a different scale, Chinese provinces \cite{zhang2022}. Detector differences can additionally reflect rerouting or instrument changes; they are not automatically behavioural effects.
 
 Glasgow's associated analytical study examines traffic in relation to the built environment and spatial dependence \cite{glasgow2024}. Our focus is instead the robustness of longitudinal recovery summaries. Other studies distinguish recovery of frequency, distance and activity space in Kunming transit records \cite{wang2022}, and heterogeneous observed and intended train-travel trajectories in Dutch panels \cite{kroesen2023}. These service-specific outcomes and intentions do not directly measure general road traffic.
+
+The relationship between observation source and mobility target also arises in Mamei et al.\ \cite{mamei2019od}, who evaluate OD matrices derived from mobile phone call detail records, including population scaling and road-network projection. Their work concerns mobility inference rather than post-pandemic recovery, but offers a related perspective on evaluating what source-specific observations can establish. Here, the corresponding boundary is between recovery of passages at a declared detector panel and recovery of citywide journeys or travel demand.
 
 \begin{table}[!ht]
 \caption{Selected recovery-measurement approaches. Targeted methodological comparison, not a systematic review.}
@@ -88,7 +92,7 @@ Together, these studies motivate examining whether recovery persists across time
 
 \section{Case Study and Observation Audit}
 \subsection{Source and Measurement Unit}
-Seven supplied municipal CSV files contain daily records with twenty-four hourly count fields, one file for each year from 2019 to 2025 \cite{counts}. Each spans January 1 to December 31 and includes detector codes, station identifiers, positions, device types, status, and street information. Counts measure motor-vehicle detections at a detector. They do not distinguish passenger cars, identify occupants, or show whether a vehicle passes another detector. Summing counts across detectors therefore measures observed passages, not unique urban journeys.
+Seven municipal CSV files obtained from the Municipality of Bologna's open-data service\footnote{Municipality of Bologna open-data portal: \url{https://opendata.comune.bologna.it/}.} contain daily records with twenty-four hourly count fields, one file for each year from 2019 to 2025 \cite{counts}. Each spans January 1 to December 31 and includes detector codes, station identifiers, positions, device types, status, and street information. Counts measure motor-vehicle detections at a detector. They do not distinguish passenger cars, identify occupants, or show whether a vehicle passes another detector. Summing counts across detectors therefore measures observed passages, not unique urban journeys.
 
 The analytical area is a fixed observation box within latitude $44.40$--$44.60$ and longitude $11.20$--$11.50$; it does not follow the municipal boundary. We retain active loop detectors with valid station identities, coordinates and dates, and finite nonnegative hourly counts. Table~\ref{tab:audit} summarises the annual source audit; the numerical outputs retain the full audit.
 
@@ -259,7 +263,7 @@ This study examined post-pandemic traffic recovery through volume relative to 20
 The Bologna case shows why recovery estimates should be reported with their target, reference period, calendar weights, retained network and uncertainty limits. Longitudinal traffic archives can inform post-pandemic comparisons only if changes in the measurements are distinguished from changes in the traffic being measured.
 
 \section*{Data and Code Availability}
-The municipal count and recording-status sources are available under CC BY 4.0; the supplied count snapshots remain unchanged. The accompanying code freezes annual source metadata and completeness exports, audits detector-days, generates all numerical tables and figures, and tests audit reconciliation and index definitions. The reproducibility manifest records exact source URLs, hashes, software versions and derived-output hashes. The analysis does not use the car-sharing, bike-sharing, air-quality or weather files present in the working directory. Authorship and repository-release details remain to be supplied before submission.
+The municipal count and recording-status sources are available under CC BY 4.0; the supplied count snapshots remain unchanged. The accompanying code freezes annual source metadata and completeness exports, audits detector-days, generates all numerical tables and figures, and tests audit reconciliation and index definitions. The reproducibility manifest records exact source URLs, hashes, software versions and derived-output hashes.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}

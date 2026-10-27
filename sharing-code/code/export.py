@@ -60,7 +60,7 @@ def export_tables(summary, contrasts, persistence):
     for mode in ['bike', 'car']:
         for region in ['Centre', 'Northern band', 'Remaining area']:
             r = regions.loc[(regions['mode'] == mode) & (regions.region == region)].set_index('window')
-            rows.append([mode.capitalize(), region, f'{100*r.loc[0, "normalised_balance"]:+.1f}',
+            rows.append([mode.capitalize(), 'Center' if region == 'Centre' else region, f'{100*r.loc[0, "normalised_balance"]:+.1f}',
                          f'{100*r.loc[2, "normalised_balance"]:+.1f}'])
     table('urban-rhythms', 'llrr', ['Source', 'Area', '06--10', '15--20'], rows)
     rows = [[r.mode, r.scenario, r.year, r.family, r.feature, r.sites, r.positive_sites,

@@ -11,12 +11,12 @@
 \input{tables/numbers}
 \newcommand{\WAPE}{\operatorname{WAPE}}
 \title{Evaluating Bike-Sharing Features for Bicycle Flow Estimation under Spatial and Temporal Transfer}
-\author{Working manuscript --- author information to be supplied\thanks{Version: October 24, 2026. This manuscript evaluates sharing patterns and bicycle-count estimation, not a validated citywide origin--destination matrix.}}
-\markboth{Working Paper, October 2026}{Bike-Sharing, Cycling Counts, and Spatial Transfer}
+\author{}
+\markboth{Bike-Sharing, Cycling Counts, and Spatial Transfer}{Bike-Sharing, Cycling Counts, and Spatial Transfer}
 \begin{document}
 \maketitle
 \begin{abstract}
-Bike-sharing records provide a large but selective source of mobility observations for estimating total bicycle flows where counters are unavailable. We evaluate their incremental predictive value through an audit-first, feature-ablation framework applied to a real-world use case with about five million rental records and directional bicycle counts from 2023--2024. Data-quality checks and temporal and spatial summaries establish what the rental features represent. Gradient boosting and regularised Poisson regression are compared using four cumulative input sets: contextual variables alone, citywide sharing activity, local endpoints, and origin--destination geometry. Models train on three counter locations in 2023 and predict a fourth, excluded location in both 2023 and 2024. Citywide sharing reduces Poisson regression's pooled weighted absolute percentage error from 38.3\%{} to 32.0\%{} in the 2023 spatial test; local endpoints and geometric features do not improve on this result. The gain does not persist in 2024, when error is 40.6\%{} with citywide sharing and 39.2\%{} without it. Location-level diagnostics distinguish temporal tracking from systematic errors in local traffic levels. The findings support evaluating selective mobility data through strong non-sharing baselines, matched feature comparisons, and location- and year-excluded tests, rather than assuming that greater data volume or spatial detail ensures transferable estimates.
+Bike-sharing records represent a valuable but selective source of information for urban mobility analysis. This paper presents a data-driven framework to assess whether these records improve the estimation of total bicycle flows at locations without counters. We evaluate the framework through a real-world use case combining approximately five million rental records with directional bicycle counts from 2023--2024. We conduct extensive data-quality checks and exploratory analysis to characterize temporal and spatial sharing patterns. Furthermore, we compare gradient boosting and regularised Poisson regression using four cumulative sets of inputs: contextual variables, citywide sharing activity, local trip endpoints, and origin--destination geometry. Models are trained on three counter locations in 2023 and evaluated at a fourth, excluded location in both years. Citywide sharing activity reduces the pooled weighted absolute percentage error of Poisson regression from 38.3\%{} to 32.0\%{} in the 2023 spatial evaluation, while local endpoints and geometric features provide no further improvement. This gain does not persist in 2024, when errors reach 40.6\%{} with sharing inputs and 39.2\%{} without them. These findings highlight the importance of spatial and temporal validation when integrating bike-sharing data into bicycle-flow estimation, showing that greater data volume and spatial detail do not necessarily yield more transferable estimates.
 \end{abstract}
 \begin{IEEEkeywords}
 Bicycle volume estimation, bike-sharing, data fusion, directional counts, spatial validation, transferability.
@@ -49,6 +49,8 @@ The description of bike-sharing use is an established research area \cite{fishma
 
 Likewise, identifying places with more returns than departures is not a new method. Song et al.\ \cite{song2026} analyse hourly spatial imbalance in Shanghai and identify recurring patterns. Such work motivates the examination of sources and sinks in our data. We use these quantities as descriptions of rental flows, not as direct observations of vehicle availability. Without inventory and redistribution logs, an excess of recorded arrivals cannot establish the number of usable bicycles present at the end of a period.
 
+Beyond cycling, Bicocchi et al.\ \cite{bicocchi2017rides} analyse urban mobility traces to identify matching rides along similar routes and support ride-sharing recommendations. Their work illustrates how recorded movements can inform shared-mobility services. Our task is different: we assess whether observations from a sharing service improve estimates of total bicycle flows at unobserved locations.
+
 Our descriptive analysis is thus not positioned as an independent discovery that cycling varies by hour or that shared bicycles accumulate unevenly. Its purpose is to expose differences relevant to the construction of priors and predictive features. A night-specific OD pattern is a reason to test temporal stratification, not a reason to assume that a night-specific expansion factor is identifiable. Similarly, the predominance of electric bicycles motivates type-specific summaries, but does not imply that this type better represents the full cycling population.
 
 \subsection{Link-Volume Estimation and Data Fusion}
@@ -65,13 +67,14 @@ Combining an initial matrix with traffic counts has a long methodological histor
 
 The choice of paths also requires care. Revealed-preference research shows that cycling route choice cannot generally be reduced to distance alone \cite{broach2012}. Recent work explicitly examines preference heterogeneity, including e-bike use \cite{lilas2025}. Endpoint records do not reveal the path a cyclist actually followed. With sparse counters, demand and route assumptions may compensate for one another, making a good count fit compatible with an incorrect demand explanation.
 
+Related evaluation issues arise when mobility is inferred from mobile phone records. Mamei et al.\ \cite{mamei2019od} examine time-based and routine-based approaches to deriving OD matrices from call detail records, including scaling to population movements and projection onto the road network. Their study provides a relevant methodological parallel: turning source-specific observations into broader flow estimates requires explicit modelling and evaluation. Here, we test rental-derived features directly against bicycle counts rather than reconstructing a population-wide OD matrix.
+
 These strands of research imply different validation targets. A volume model can be checked against counts at excluded sections. An OD estimator additionally needs reference movements to assess the estimated matrix. Our target is the first: directional bicycle flows at measured sections excluded from training. Rental OD information enters as an input feature rather than a total-demand matrix to be reconstructed. This keeps the evaluation tied to an outcome that the available observations can check directly.
 
 The observation design is also important for this prediction task. Nearby paired devices should not become independent test locations, because their observations may describe the same local traffic. Likewise, a random split of hours can leave observations from the same place in both training and test sets. It then measures prediction at known places rather than transfer to new ones. We group paired devices, exclude entire locations, and retain the distinction between repeated temporal observations and independent spatial coverage.
 
 Our positioning is empirical and comparative. We test sharing features against no-sharing and simple expansion baselines under location and year exclusion. The contribution is evidence about when these inputs improve bicycle-count estimates and where transfer fails, rather than a new prediction algorithm or a reconstructed citywide OD matrix.
 
-% Keep the first two pages unchanged; compact floats from Section III onward.
 \setlength{\textfloatsep}{9pt plus 2pt minus 2pt}
 \setlength{\dbltextfloatsep}{9pt plus 2pt minus 2pt}
 \setlength{\floatsep}{7pt plus 2pt minus 2pt}
@@ -331,6 +334,8 @@ This study evaluated selective mobility features for bicycle-flow estimation thr
 \emph{RQ3---Transfer to excluded locations and year.} The citywide-sharing gain does not persist in 2024: Poisson WAPE is 40.6\%{} with sharing and 39.2\%{} without it. Local diagnostics reveal heterogeneous errors and persistent volume biases even when temporal changes are tracked. The experiments therefore do not establish reliable transfer across both location and year, or justify a citywide flow map.
 
 The broader applied machine-learning contribution is an evaluation protocol: audit the selective source, compare cumulative feature sets against strong contextual baselines across model families, exclude entire locations, test subsequent-year performance, and inspect local bias as well as aggregate error. The Bologna use case demonstrates this protocol, not universal effect sizes. Four eligible locations in one city provide limited spatial evidence, and the subsequent-year test combines spatial and temporal change. Wider validation across locations, services, and cities, together with verified route and contextual information, is needed before deploying these estimates beyond the observed setting. The present models estimate section-level bicycle passages, not the OD demand that generated them.
+
+\noindent{\bf Acknowledgment.} This work is supported by project Support System for Sustainable Smart Cities - S4C, PG/2023/308180 (CUP E27G22000310007). The sharing data used in this study were shared within the project.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}

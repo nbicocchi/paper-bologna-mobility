@@ -111,12 +111,12 @@ def draw_maps(grids):
                 ax.plot(*project(0, 0), '+', color='black', markersize=5, zorder=3)
                 ax.set_title(f'({chr(97 + row * 4 + w)}) {WINDOWS[w]}')
                 if row == 1:
-                    ax.set_xlabel('East of centre (km)')
+                    ax.set_xlabel('East of center (km)')
                 if w == 0:
-                    ax.set_ylabel(f'{"Bike" if mode == "bike" else "Car"}-sharing\nNorth of centre (km)')
+                    ax.set_ylabel(f'{"Bike" if mode == "bike" else "Car"}-sharing\nNorth of center (km)')
             fig.colorbar(mesh, ax=axes[row].tolist(), shrink=.8,
                          label='Endpoint events / hour' if measure == 'events_per_hour' else '(Arrivals − departures) / events')
-        fig.supxlabel(ATTRIBUTION + '\n500 m cells · matched hours · cross: city reference point · uncoloured: suppressed, not zero', fontsize=8)
+        fig.supxlabel(ATTRIBUTION + '\n500 m cells · matched hours · cross: city reference point · uncolored: suppressed, not zero', fontsize=8)
         save(fig, name)
     draw_counter_network(networks, context, extent, network_bounds)
 
@@ -151,7 +151,7 @@ def draw_counter_network(networks, context, extent, bounds):
                 ax.annotate(s.site.replace('_', ' '), project(s.x, s.y), xytext=(4, 4), textcoords='offset points', fontsize=8,
                             bbox=dict(facecolor='white', edgecolor='none', alpha=.85, pad=1), zorder=4)
         ax.set(title=f'Bicycle counters: {len(sites)} locations' if mode == 'bike' else f'Motor-vehicle counters: {len(sites)} devices',
-               xlabel='East of centre (km)', ylabel='North of centre (km)', aspect='equal')
+               xlabel='East of center (km)', ylabel='North of center (km)', aspect='equal')
     fig.supxlabel(ATTRIBUTION + '\nCartographic context only; not the historical routing network', fontsize=8)
     save(fig, 'counter-network')
 

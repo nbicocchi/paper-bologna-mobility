@@ -9,14 +9,14 @@
 \graphicspath{{figures/}}
 \input{tables/cars-numbers}
 \newcommand{\WAPE}{\operatorname{WAPE}}
-\title{Evaluating Car-Sharing Features for Motor-Vehicle Flow Estimation under Spatial and Temporal Transfer}
-\author{Working manuscript --- author information to be supplied\thanks{Version: October 24, 2026. This manuscript evaluates car-sharing features against motor-vehicle detector counts, not passenger-car-only traffic, causal impacts, or a validated citywide origin--destination matrix.}}
-\markboth{Working Paper, October 2026}{Car-Sharing, Motor-Vehicle Counts, and Spatial Transfer}
+\title{From Rental Endpoints to Road Traffic Counts: Assessing the Predictive Value of Car-Sharing Data}
+\author{}
+\markboth{Car-Sharing, Motor-Vehicle Counts, and Spatial Transfer}{Car-Sharing, Motor-Vehicle Counts, and Spatial Transfer}
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Car-sharing rental records describe a selective set of vehicle uses, but their value for estimating wider traffic flows requires validation against independent observations. We evaluate this value through an audit-first, feature-ablation framework using car rentals and motor-vehicle counts in 2023--2024. Filtering retains 411,241 rentals. Detector identities are reconciled across changing codes, and official hourly completeness records determine which count periods are usable. Models train on 2023 observations and are evaluated through five spatial folds, with nearby devices grouped and a 250 m training exclusion buffer. The same fitted models are then tested at the excluded devices in 2024. Gradient boosting and regularised Poisson regression use four cumulative input sets: contextual variables, citywide sharing, local endpoints, and origin--destination geometry. For boosting, citywide sharing reduces pooled weighted absolute percentage error from \SpatialBoostBasePooled\%{} to \SpatialBoostGlobalPooled\%{} in 2023; local endpoints and geometric features produce no further change under the fixed configuration. In 2024, pooled error is \ForwardBoostBasePooled\%{} without sharing and \ForwardBoostGlobalPooled\%{} with it. Residual near-zero detector totals make mean device-level percentage errors unstable despite complete-recording flags. The findings show why source audits, buffered spatial tests, multiple error summaries, and subsequent-year evaluation are necessary before selective rental records are used to estimate traffic beyond observed locations.
+Car-sharing records represent a valuable but selective source of information for urban mobility analysis. This paper presents a data-driven framework to assess whether these records improve the estimation of motor-vehicle flows at locations without training counts. We evaluate the framework through a real-world use case combining 411,241 retained rentals with traffic counts from 2023--2024. We conduct data-quality checks, reconcile changing detector identifiers, and use official completeness records to identify usable observations. Furthermore, we compare gradient boosting and regularised Poisson regression using contextual variables, citywide sharing activity, local endpoints, and origin--destination geometry. Models are trained on 2023 observations through five spatial folds, grouping nearby devices and excluding training detectors within 250 m of test devices, and evaluated at excluded devices in both years. Citywide sharing reduces the pooled weighted absolute percentage error of boosting from \SpatialBoostBasePooled\%{} to \SpatialBoostGlobalPooled\%{} in 2023, while local and geometric features provide no further change. This gain does not persist in 2024, when errors are \ForwardBoostBasePooled\%{} without sharing and \ForwardBoostGlobalPooled\%{} with it. Near-zero detector totals also make mean device-level percentage errors unstable despite complete-recording flags. These findings highlight the importance of source audits and spatial and temporal validation before selective rental records are used to estimate broader traffic flows.
 \end{abstract}
 \begin{IEEEkeywords}
 Car-sharing, traffic volume estimation, inductive loops, selective mobility data, spatial validation, transferability.
@@ -43,6 +43,8 @@ Jorge and Correia \cite{jorge2013} review car-sharing demand estimation and oper
 
 The distinction matters for endpoint summaries. A return close to the collection point can represent a genuine round-trip rental. A long rental can contain periods when the vehicle is stationary. Arrivals minus departures describe recorded rental flows, but do not determine available vehicles without opening stocks and operator movements. We therefore retain near-origin rentals and distinguish rental duration from driving time. The descriptive analysis establishes what the inputs represent before asking whether they help predict detector counts.
 
+Bicocchi et al.\ \cite{bicocchi2017rides} analyse urban mobility traces to identify matching rides along similar routes and support ride-sharing recommendations. Their study illustrates the use of recorded movements to inform shared-mobility services, but ride-sharing opportunities are a different target from car-rental activity or total road traffic. Here, we assess rental features against independent motor-vehicle counts rather than infer their usefulness from service-level applications.
+
 \subsection{Selective Vehicle Data and Traffic Volumes}
 Network-wide traffic volume estimation from probe vehicles is an active research problem. Eisinga and Lorkowski \cite{eisinga2025} study volume estimation based on probe vehicle data, illustrating the broader objective of using selective mobile observations beyond fixed counting positions. The observation mechanism remains essential: trajectories can provide evidence of link use, whereas our rental records expose only endpoints and times. A straight line between those endpoints is a geometric predictor, not an observed road crossing.
 
@@ -52,6 +54,8 @@ Spatial validation must also reflect the intended use. Splitting individual date
 
 \subsection{Count Prediction and OD Inference}
 Inferring an origin--destination (OD) matrix from traffic counts has a long methodological history. Entropy-based estimation \cite{vanzuylen1980} and generalised least squares \cite{cascetta1984} combine prior information with count constraints. More recent Bayesian work explicitly incorporates traffic assignment and route probabilities \cite{hazelton2024}. These methods address a different target from the direct count models used here.
+
+Mamei et al.\ \cite{mamei2019od} examine OD estimation from mobile phone call detail records, including time-based and routine-based approaches, population scaling, and projection onto the road network. Their work provides a related evaluation perspective on deriving broader movement estimates from source-specific observations. Our rental endpoints enter direct count models instead, without reconstructing population-wide demand or assigning trips to road paths.
 
 A count fit alone does not establish that an estimated OD explanation is correct. Different movements and route choices can produce similar observations at a limited set of sensors. We therefore use rental OD geometry as an input rather than reconstructing a total-demand matrix. Predictions are checked against measured detector passages; no reference trajectories or independent OD observations are available to validate the journeys that generated them.
 
@@ -322,6 +326,8 @@ This study evaluated car-sharing features for motor-vehicle count estimation thr
 \emph{RQ3---Transfer beyond training observations.} The modest 2023 pooled benefit does not persist in 2024: boosting has WAPE of \ForwardBoostBasePooled\%{} without sharing and \ForwardBoostGlobalPooled\%{} with it, while sharing worsens the Poisson results. Residual near-zero and zero detector series further show why complete recording, stable percentage summaries, and correct local calibration are different requirements.
 
 The broader methodological lesson is to evaluate selective endpoint data against contextual baselines, reconcile changing sensor identities, use measurement-completeness information, exclude nearby training positions, and inspect multiple local and aggregate errors. The Bologna use case demonstrates this protocol, not universal performance limits. Provider-verified observations, road context, and external validation are necessary before these estimates are extended to unobserved networks. The present study predicts detector passages, not passenger-car-only flows or the OD demand that generated them.
+
+\noindent{\bf Acknowledgment.} This work is supported by project Support System for Sustainable Smart Cities - S4C, PG/2023/308180 (CUP E27G22000310007). The sharing data used in this study were shared within the project.
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
