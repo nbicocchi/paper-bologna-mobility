@@ -161,7 +161,8 @@ def draw_sharing_maps(t,sites,coverage):
     west=LON0+xedges[0]/(111.195*np.cos(np.deg2rad(LAT0)))
     east=LON0+xedges[-1]/(111.195*np.cos(np.deg2rad(LAT0)))
     south=LAT0+yedges[0]/111.195;north=LAT0+yedges[-1]/111.195
-    context,extent=basemap((west,south,east,north))
+    # Use higher-detail source tiles, not just a higher export resolution.
+    context,extent=basemap((west,south,east,north),zoom=13)
     X,Y=np.meshgrid(xedges,yedges);mx,my=project_local(X,Y)
     sx,sy=project_local(sites.x,sites.y)
     gx=np.rint(xedges[:-1]/cell).astype(int);gy=np.rint(yedges[:-1]/cell).astype(int)
@@ -207,8 +208,9 @@ def draw_sharing_maps(t,sites,coverage):
         colorbar=fig.colorbar(mesh,ax=axs.ravel().tolist(),shrink=.82,label=label)
         if measure=='ratio':colorbar.set_ticks([-1,-.5,0,.5,1])
         fig.supxlabel(ATTRIBUTION+'\nCrosses: counters · Same valid periods and 500 m cells in both figures',fontsize=6)
-        fig.savefig(TEXT/'figures'/f'{name}.pdf',bbox_inches='tight')
-        fig.savefig(TEXT/'figures'/f'{name}.png',bbox_inches='tight',dpi=220)
+        # Keep raster layers at publication resolution; labels remain vector in PDF.
+        fig.savefig(TEXT/'figures'/f'{name}.pdf',bbox_inches='tight',dpi=300)
+        fig.savefig(TEXT/'figures'/f'{name}.png',bbox_inches='tight',dpi=300)
         plt.close(fig)
     details=[]
     for block,data,mask in panels:

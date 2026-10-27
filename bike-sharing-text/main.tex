@@ -1,9 +1,11 @@
-\documentclass[journal,10pt]{IEEEtran}
+\documentclass{interact}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath,amssymb}
 \usepackage{graphicx,booktabs,array}
-\usepackage{cite}
+\usepackage[natbibapa]{tfapastyle}
+\setlength\bibhang{12pt}
+\renewcommand\bibliographytypesize{\fontsize{10}{12}\selectfont}
 \usepackage{xurl}
 \usepackage[hidelinks]{hyperref}
 \usepackage{url}
@@ -11,23 +13,25 @@
 \input{tables/numbers}
 \newcommand{\WAPE}{\operatorname{WAPE}}
 \title{Evaluating Bike-Sharing Features for Bicycle Flow Estimation under Spatial and Temporal Transfer}
-\author{}
-\markboth{Bike-Sharing, Cycling Counts, and Spatial Transfer}{Bike-Sharing, Cycling Counts, and Spatial Transfer}
+\author{
+\name{Nicola Bicocchi\textsuperscript{a}\thanks{CONTACT Nicola Bicocchi. Email: \href{mailto:nicola.bicocchi@unimore.it}{nicola.bicocchi@unimore.it}} and Marco Mamei\textsuperscript{b}}
+\affil{\textsuperscript{a}Department of Engineering ``Enzo Ferrari'', University of Modena and Reggio Emilia, Modena, Italy; \textsuperscript{b}Department of Sciences and Methods for Engineering, University of Modena and Reggio Emilia, Reggio Emilia, Italy}
+}
 \begin{document}
 \maketitle
 \begin{abstract}
-Bike-sharing records represent a valuable but selective source of information for urban mobility analysis. This paper presents a data-driven framework to assess whether these records improve the estimation of total bicycle flows at locations without counters. We evaluate the framework through a real-world use case combining approximately five million rental records with directional bicycle counts from 2023--2024. We conduct extensive data-quality checks and exploratory analysis to characterize temporal and spatial sharing patterns. Furthermore, we compare gradient boosting and regularised Poisson regression using four cumulative sets of inputs: contextual variables, citywide sharing activity, local trip endpoints, and origin--destination geometry. Models are trained on three counter locations in 2023 and evaluated at a fourth, excluded location in both years. Citywide sharing activity reduces the pooled weighted absolute percentage error of Poisson regression from 38.3\%{} to 32.0\%{} in the 2023 spatial evaluation, while local endpoints and geometric features provide no further improvement. This gain does not persist in 2024, when errors reach 40.6\%{} with sharing inputs and 39.2\%{} without them. These findings highlight the importance of spatial and temporal validation when integrating bike-sharing data into bicycle-flow estimation, showing that greater data volume and spatial detail do not necessarily yield more transferable estimates.
+Bike-sharing records represent a valuable but selective source of information for urban mobility analysis. This paper presents a data-driven framework to assess whether these records improve the estimation of total bicycle flows at locations without counters. We evaluate the framework through a real-world use case combining approximately five million rental records with directional bicycle counts from 2023--2024. We conduct extensive data-quality checks and exploratory analysis to characterise temporal and spatial sharing patterns. Furthermore, we compare gradient boosting and regularised Poisson regression using four cumulative sets of inputs: contextual variables, citywide sharing activity, local trip endpoints, and origin--destination geometry. Models are trained on three counter locations in 2023 and evaluated at a fourth, excluded location in both years. Citywide sharing activity reduces the pooled weighted absolute percentage error of Poisson regression from 38.3\%{} to 32.0\%{} in the 2023 spatial evaluation, while local endpoints and geometric features provide no further improvement. This gain does not persist in 2024, when errors reach 40.6\%{} with sharing inputs and 39.2\%{} without them. These findings highlight the importance of rigorous spatial and temporal validation when integrating bike-sharing data into bicycle-flow estimation, showing that greater data volume and spatial detail do not necessarily yield more transferable estimates.
 \end{abstract}
-\begin{IEEEkeywords}
-Bicycle volume estimation, bike-sharing, data fusion, directional counts, spatial validation, transferability.
-\end{IEEEkeywords}
+\begin{keywords}
+Bicycle volume estimation; bike-sharing; data fusion; spatial validation; transferability
+\end{keywords}
 
 \section{Introduction}
-\IEEEPARstart{C}{ities} need information about where and when cycling occurs to monitor networks and plan further observations. Permanent counters provide detailed temporal records, but a few measurement locations cannot describe all movements across a city. Bike-sharing systems, whose development spans several generations and operating models \cite{shaheen2010}, offer complementary records of trip endpoints and times. Expanding these rentals to all cycling requires assumptions about service users, vehicle availability, and the paths connecting endpoints.
+Cities need information about where and when cycling occurs to monitor networks and plan further observations. Permanent counters provide detailed temporal records, but a few measurement locations cannot describe all movements across a city. Bike-sharing systems, whose development spans several generations and operating models \citep{shaheen2010}, offer complementary records of trip endpoints and times. Expanding these rentals to all cycling requires assumptions about service users, vehicle availability, and the paths connecting endpoints.
 
-The practical question is whether these records help estimate total bicycle flows at locations without training counts. A large rental file can describe a service in detail while adding little information about traffic elsewhere. We therefore evaluate sharing data by their improvement over a model that uses only location, calendar, and weather information.
+The practical question is whether these records help estimate total bicycle flows at locations without training counts. A large rental file can describe a service in detail while adding little information about traffic elsewhere. We therefore evaluate sharing data by the improvement they provide over a model that uses only location, calendar, and weather information.
 
-The need for comparable cycling observations is reflected in the European Commission's 2026 Cycling Counts initiative \cite{cyclingCounts2026}. Research has developed link-volume models, data fusion, and graph-based methods \cite{bhowmick2023,kothuri2022,gupta2025}. Kaiser et al.\ \cite{kaiser2025} combine sharing, crowdsourced activity, and contextual data to extrapolate bicycle volumes across Berlin. Other studies estimate bicycle origin--destination (OD) matrices from initial demand models and traffic counts \cite{ryu2020,melo2023}. Our focus is not combining sources alone, but testing what their integration supports outside observed locations.
+The need for comparable cycling observations is reflected in the European Commission's 2026 Cycling Counts initiative \citep{cyclingCounts2026}. Research has developed link-volume models, data fusion, and graph-based methods \citep{bhowmick2023,kothuri2022,gupta2025}. \citet{kaiser2025} combine sharing, crowdsourced activity, and contextual data to extrapolate bicycle volumes across Berlin. Other studies estimate bicycle origin--destination (OD) matrices from initial demand models and traffic counts \citep{ryu2020,melo2023}. Our focus is not combining sources alone, but testing what their integration supports outside observed locations.
 
 We apply this evaluation to a real-world use case using rental endpoints and directional bicycle counts from 2023--2024. Four sections have enough 2023 coverage for the prediction experiment. For each test location, models train on the other three sections and are evaluated at the excluded section in both 2023 and 2024. This design separates transfer to an unobserved location from the additional change in year. A data-quality audit and descriptive summaries establish which rental observations enter these comparisons. The use case provides an empirical test bed for the evaluation framework, not evidence of performance across cities.
 
@@ -39,54 +43,42 @@ The contribution is a reproducible evaluation framework for the added value and 
 
 Three questions organise the analysis. \emph{RQ1}: which rental observations are usable, and what travel patterns do they describe? \emph{RQ2}: how much do citywide activity, local endpoints, and OD geometry add to a non-sharing count model? \emph{RQ3}: do the resulting estimates transfer to locations and a year excluded from training?
 
-RQ1 is addressed by the filtering audit, temporal summaries, OD comparisons, and activity/balance maps in Section~III. RQ2 is addressed by the four-set feature ablation within each model family in Section~IV-D. RQ3 is addressed by the location-excluded 2023 and subsequent-year 2024 tests in Section~IV-C--D, with local-error and time-profile diagnostics in Section~IV-E. The same prediction experiments serve RQ2 and RQ3: feature contrasts measure incremental value, whereas the excluded locations and year test transfer.
+RQ1 is addressed by the filtering audit, temporal summaries, OD comparisons, and activity/balance maps in Section~\ref{sec:sharing}. RQ2 is addressed by the four-set feature ablation within each model family in Section~\ref{sec:results}. RQ3 is addressed by the location-excluded 2023 and subsequent-year 2024 tests in Sections~\ref{sec:evaluation}--\ref{sec:results}, with local-error and time-profile diagnostics in Section~\ref{sec:diagnostics}. The same prediction experiments serve RQ2 and RQ3: feature contrasts measure incremental value, whereas the excluded locations and year test transfer.
 
-The rest of the paper is organized as follows. Section~II reviews related work and positions the study. Section~III introduces the experimental setting and characterises the sharing data. Section~IV presents the predictive evaluation and its limitations. Section~V concludes by answering the three research questions.
+The rest of the paper is organised as follows. Section~\ref{sec:related} reviews related work and positions the study. Section~\ref{sec:sharing} introduces the experimental setting and characterises the sharing data. Section~\ref{sec:counts} presents the predictive evaluation and its limitations. Section~\ref{sec:conclusion} concludes by answering the three research questions.
 
 \section{Related Work}
+\label{sec:related}
 \subsection{From Sharing Patterns to Cycling Observations}
-The description of bike-sharing use is an established research area \cite{fishman2016}. Temporal profiles, trip-length distributions, hotspots, and OD networks reveal how a particular service is used. They do not establish that rental users are a probability sample of all cyclists. Yu et al.\ \cite{yu2024} explicitly study variation across daytime and nighttime periods in Beijing, combining spatial patterns, OD networks, and associations with the built environment. Their contextual definition of nighttime also illustrates why an operational window must be stated rather than assumed to be universal.
+The description of bike-sharing use is an established research area \citep{fishman2016}. Temporal profiles, trip-length distributions, hotspots, and OD networks reveal how a particular service is used. They do not establish that rental users are a probability sample of all cyclists. \citet{yu2024} explicitly study variation across daytime and nighttime periods in Beijing, combining spatial patterns, OD networks, and associations with the built environment. Their contextual definition of nighttime also illustrates why an operational window must be stated rather than assumed to be universal.
 
-Likewise, identifying places with more returns than departures is not a new method. Song et al.\ \cite{song2026} analyse hourly spatial imbalance in Shanghai and identify recurring patterns. Such work motivates the examination of sources and sinks in our data. We use these quantities as descriptions of rental flows, not as direct observations of vehicle availability. Without inventory and redistribution logs, an excess of recorded arrivals cannot establish the number of usable bicycles present at the end of a period.
+Likewise, identifying places with more returns than departures is not a new method. \citet{song2026} analyse hourly spatial imbalance in Shanghai and identify recurring patterns. Such work motivates the examination of sources and sinks in our data. We use these quantities as descriptions of rental flows, not as direct observations of vehicle availability. Without inventory and redistribution logs, an excess of recorded arrivals cannot establish the number of usable bicycles present at the end of a period.
 
-Beyond cycling, Bicocchi et al.\ \cite{bicocchi2017rides} analyse urban mobility traces to identify matching rides along similar routes and support ride-sharing recommendations. Their work illustrates how recorded movements can inform shared-mobility services. Our task is different: we assess whether observations from a sharing service improve estimates of total bicycle flows at unobserved locations.
+Beyond cycling, \citet{bicocchi2017rides} analyse urban mobility traces to identify matching rides along similar routes and support ride-sharing recommendations. Their work illustrates how recorded movements can inform shared-mobility services. Our task is different: we assess whether observations from a sharing service improve estimates of total bicycle flows at unobserved locations.
 
 Our descriptive analysis is thus not positioned as an independent discovery that cycling varies by hour or that shared bicycles accumulate unevenly. Its purpose is to expose differences relevant to the construction of priors and predictive features. A night-specific OD pattern is a reason to test temporal stratification, not a reason to assume that a night-specific expansion factor is identifiable. Similarly, the predominance of electric bicycles motivates type-specific summaries, but does not imply that this type better represents the full cycling population.
 
 \subsection{Link-Volume Estimation and Data Fusion}
-Bhowmick et al.\ \cite{bhowmick2023} map methods for estimating link-level bicycle volumes. Kothuri et al.\ \cite{kothuri2022} examine emerging data sources in combination with conventional observations across several settings. Miah et al.\ \cite{miah2023} compare statistical and machine-learning methods using bicycle activity and contextual variables. These precedents require an empirical baseline that predicts counts directly, without first reconstructing an OD matrix. Otherwise, an elaborate inverse model could appear valuable simply because a simpler use of the same data was never tested.
+\citet{bhowmick2023} map methods for estimating link-level bicycle volumes. \citet{kothuri2022} examine emerging data sources in combination with conventional observations across several settings. \citet{miah2023} compare statistical and machine-learning methods using bicycle activity and contextual variables. These precedents require an empirical baseline that predicts counts directly, without first reconstructing an OD matrix. Otherwise, an elaborate inverse model could appear valuable simply because a simpler use of the same data was never tested.
 
-Kaiser et al.\ \cite{kaiser2025} are particularly close to the present application. Their Berlin analysis includes bike-sharing OD, routes imputed between endpoints, counts, Strava, and multiple contextual feature groups. Their spatial validation excludes counting locations, and they examine improvements from short-term local counts. They aggregate counter directions for a volume-prediction task. Their results do not establish that sharing is universally weak or universally useful: its incremental value depends on feature engineering, the service, the setting, and the other available information.
+The work of \citet{kaiser2025} is particularly close to the present application. Their Berlin analysis includes bike-sharing OD data, routes imputed between endpoints, counts, Strava, and multiple contextual feature groups. Their spatial validation excludes counting locations, and they examine improvements from short-term local counts. They aggregate counts across directions for a volume-prediction task. Their results do not establish that sharing is universally weak or universally useful: its incremental value depends on feature engineering, the service, the setting, and the other available information.
 
-More recently, Tori et al.\ \cite{tori2026} link Strava activity and automated counts in Brussels and use estimated volumes to investigate infrastructure gaps. A map of putative high-demand corridors is therefore not sufficient differentiation either. For this study, the distinction is the audit-first evaluation of a selective endpoint source, its transfer under severe spatial scarcity, and the explicit boundary between predicting observed flows and identifying unobserved demand.
+More recently, \citet{tori2026} link Strava activity and automated counts in Brussels and use estimated volumes to investigate infrastructure gaps. A map of putative high-demand corridors is therefore not sufficient differentiation either. For this study, the distinction is the audit-first evaluation of a selective endpoint source, its transfer under severe spatial scarcity, and the explicit boundary between predicting observed flows and identifying unobserved demand.
 
-Gupta et al.\ \cite{gupta2025} address data sparsity with graph convolutional models. The accessible preprint \cite{guptaPreprint} uses Strava-derived link counts as a target while masking observations. Such an experiment is informative about recovery of that target under missingness, but is not automatically a validation of all-cyclist volumes or an OD matrix. This distinction motivates the explicit naming of every target and missing-data mechanism in our experiments.
+\citet{gupta2025} address data sparsity with graph convolutional models. The accessible preprint \citep{guptaPreprint} uses Strava-derived link counts as a target while masking observations. Such an experiment is informative about recovery of that target under missingness, but is not automatically a validation of all-cyclist volumes or an OD matrix. This distinction motivates the explicit naming of every target and missing-data mechanism in our experiments.
 
 \subsection{OD Inference, Priors, and Paths}
-Combining an initial matrix with traffic counts has a long methodological history, including entropy-based estimation \cite{vanzuylen1980} and generalised least squares \cite{cascetta1984}. In cycling, Ryu \cite{ryu2020} uses a gravity-based initial matrix and a path-flow estimation stage; de Melo and Isler \cite{melo2023} integrate count-based updating with deterrence-function estimation. Hazelton and Najim \cite{hazelton2024} address Bayesian OD inference assisted by traffic assignment, including uncertainty associated with route probabilities. These approaches estimate demand through a route-assignment model; our study instead tests rental features directly against total bicycle counts.
+Combining an initial matrix with traffic counts has a long methodological history, including entropy-based estimation \citep{vanzuylen1980} and generalised least squares \citep{cascetta1984}. In cycling, \citet{ryu2020} uses a gravity-based initial matrix and a path-flow estimation stage; \citet{melo2023} integrate count-based updating with deterrence-function estimation. \citet{hazelton2024} address Bayesian OD inference assisted by traffic assignment, including uncertainty associated with route probabilities. These approaches estimate demand through a route-assignment model; our study instead tests rental features directly against total bicycle counts.
 
-The choice of paths also requires care. Revealed-preference research shows that cycling route choice cannot generally be reduced to distance alone \cite{broach2012}. Recent work explicitly examines preference heterogeneity, including e-bike use \cite{lilas2025}. Endpoint records do not reveal the path a cyclist actually followed. With sparse counters, demand and route assumptions may compensate for one another, making a good count fit compatible with an incorrect demand explanation.
+The choice of paths also requires care. Revealed-preference research shows that cycling route choice cannot generally be reduced to distance alone \citep{broach2012}. Recent work explicitly examines preference heterogeneity, including e-bike use \citep{lilas2025}. Endpoint records do not reveal the path a cyclist actually followed. With sparse counters, demand and route assumptions may compensate for one another, making a good count fit compatible with an incorrect demand explanation.
 
-Related evaluation issues arise when mobility is inferred from mobile phone records. Mamei et al.\ \cite{mamei2019od} examine time-based and routine-based approaches to deriving OD matrices from call detail records, including scaling to population movements and projection onto the road network. Their study provides a relevant methodological parallel: turning source-specific observations into broader flow estimates requires explicit modelling and evaluation. Here, we test rental-derived features directly against bicycle counts rather than reconstructing a population-wide OD matrix.
+Related evaluation issues arise when mobility is inferred from mobile phone records. \citet{mamei2019od} examine time-based and routine-based approaches to deriving OD matrices from call detail records, including scaling to population movements and projection onto the road network. Their study provides a relevant methodological parallel: turning source-specific observations into broader flow estimates requires explicit modelling and evaluation. Here, we test rental-derived features directly against bicycle counts rather than reconstructing a population-wide OD matrix.
 
 These strands of research imply different validation targets. A volume model can be checked against counts at excluded sections. An OD estimator additionally needs reference movements to assess the estimated matrix. Our target is the first: directional bicycle flows at measured sections excluded from training. Rental OD information enters as an input feature rather than a total-demand matrix to be reconstructed. This keeps the evaluation tied to an outcome that the available observations can check directly.
 
 The observation design is also important for this prediction task. Nearby paired devices should not become independent test locations, because their observations may describe the same local traffic. Likewise, a random split of hours can leave observations from the same place in both training and test sets. It then measures prediction at known places rather than transfer to new ones. We group paired devices, exclude entire locations, and retain the distinction between repeated temporal observations and independent spatial coverage.
 
 Our positioning is empirical and comparative. We test sharing features against no-sharing and simple expansion baselines under location and year exclusion. The contribution is evidence about when these inputs improve bicycle-count estimates and where transfer fails, rather than a new prediction algorithm or a reconstructed citywide OD matrix.
-
-\setlength{\textfloatsep}{9pt plus 2pt minus 2pt}
-\setlength{\dbltextfloatsep}{9pt plus 2pt minus 2pt}
-\setlength{\floatsep}{7pt plus 2pt minus 2pt}
-\setlength{\dblfloatsep}{7pt plus 2pt minus 2pt}
-\renewcommand{\topfraction}{0.9}
-\renewcommand{\dbltopfraction}{0.9}
-\renewcommand{\textfraction}{0.08}
-\renewcommand{\floatpagefraction}{0.75}
-\renewcommand{\dblfloatpagefraction}{0.75}
-\setcounter{topnumber}{3}
-\setcounter{dbltopnumber}{3}
-\setcounter{totalnumber}{5}
 
 \section{Bike-Sharing Data and Travel Patterns}
 \label{sec:sharing}
@@ -120,7 +112,7 @@ Final retained records & 1,731,828 & 2,842,801 \\
 \end{tabular}
 \end{table}
 
-For duration summaries, we also require duration at most 180 min and speed based on endpoint distance at most 45 km/h. For recorded-distance summaries, the value must be finite and within 0--50 km. These extra checks affect only the corresponding summary, not the set of trips used in endpoint maps or prediction features. Recorded distance is not a verified route length.
+For duration summaries, we also require a duration of at most 180 min and a speed based on endpoint distance of at most 45 km/h. For recorded-distance summaries, the value must be finite and within 0--50 km. These extra checks affect only the corresponding summary, not the set of trips used in endpoint maps or prediction features. Recorded distance is not a verified route length.
 
 Trip totals use all records passing the main filters, whereas duration and recorded-distance summaries use separate valid-measurement subsets. Sensitivity files also test minimum durations of 0.5, one, and two minutes, maximum durations of sixty and 180 minutes, and endpoint-speed limits of thirty and 45 km/h. No check reintroduces records below 30 seconds or repairs corrupted timestamps.
 
@@ -129,11 +121,11 @@ In October 2023, almost all of about 278,000 unique records have identical start
 \subsection{Trip Numbers and Monthly Trends}
 The filtered data contain about 1.7M rentals in 2023 and 2.8M in 2024. Electric bicycles account for about 93\%{} of all retained trips. Figure~\ref{fig:monthly} shows monthly totals by bicycle type. Counts are higher overall in 2024, but the two years have unequal coverage after filtering. In particular, the October 2023 gap must not be read as a real drop in service use.
 
-\begin{figure*}[t]
+\begin{figure}
 \centering\includegraphics[width=\textwidth]{monthly}
 \caption{Monthly sharing trips after filtering, by bicycle type. The October 2023 gap is caused by incorrect timestamps, not absent demand.}
 \label{fig:monthly}
-\end{figure*}
+\end{figure}
 
 \subsection{Time of Use, Bicycle Type, and Trip Length}
 Night departures account for about 16\%{} of retained rentals. For the day/night comparisons, day covers 06:00--22:59 and night covers 23:00--05:59 local time. After-midnight trips belong to the previous evening's service day. Figure~\ref{fig:hourly} compares departure-hour patterns by bicycle type and day type. Each curve is normalised within its group, so it shows when trips occur rather than how many trips that group contains.
@@ -144,19 +136,19 @@ Night departures account for about 16\%{} of retained rentals. For the day/night
 \input{tables/trips}
 \end{table}
 
-\begin{figure*}[t]
+\begin{figure}
 \centering\includegraphics[width=\textwidth]{hourly}
 \caption{Departure-hour patterns by bicycle type and day type. Each curve is normalised within its group. Shading marks 23:00--05:59.}
 \label{fig:hourly}
-\end{figure*}
+\end{figure}
 
 Table~\ref{tab:trips} shows that median durations are close to ten minutes across bicycle types and periods. Electric rentals have longer median recorded distances than mechanical rentals in every listed group. For example, in daytime 2024 the medians are about 1.7 km and 1.3 km, respectively. These differences describe the recorded trips; they do not establish why users chose a bicycle type or made a trip.
 
-\begin{figure*}[t]
+\begin{figure}
 \centering\includegraphics[width=\textwidth]{distributions}
 \caption{Cumulative distributions of recorded distance and duration, by bicycle type and period. Only valid values of each measure are included.}
 \label{fig:distributions}
-\end{figure*}
+\end{figure}
 
 Figure~\ref{fig:distributions} shows the full distributions behind these medians. Distance and duration use different valid-record subsets. Some reported distances are shorter than the straight-line endpoint distance, and the source does not fully explain how distance was measured. We therefore use this field as reported, not as a reconstructed route length.
 
@@ -176,11 +168,11 @@ Figures~\ref{fig:activity} and \ref{fig:balance} describe the same locations and
 
 Figure~\ref{fig:activity} shows where rental activity is concentrated. For each cell, we add arrivals and departures and divide by the total valid hours in that panel, accounting for the different window lengths, excluded dates, and clock changes. All four panels use the same colour scale. A departure and an arrival count as separate events, not as observed street crossings.
 
-\begin{figure*}[t]
+\begin{figure}
 \centering\includegraphics[width=\textwidth]{activity}
 \caption{Sharing activity in 2023--2024: (a) 06--10, (b) 10--15, (c) 15--20, and (d) night, 20--06. Colour shows arrivals plus departures per valid hour in each 500 m cell, with the same scale in all panels. Cells with fewer than 200 events are uncoloured. Periods, grid, and extent match Fig.~\ref{fig:balance}. Crosses mark counters, named in panel (a). Background: \copyright{} OpenStreetMap contributors, \url{https://www.openstreetmap.org/copyright}.}
 \label{fig:activity}
-\end{figure*}
+\end{figure}
 
 Figure~\ref{fig:balance} instead shows whether each area receives more rentals than it sends out. For cell $z$ and time window $r$, let $D_{zr}$ be departures and $A_{zr}$ arrivals. The net balance and its normalised form are
 \begin{equation}
@@ -189,11 +181,11 @@ Figure~\ref{fig:balance} instead shows whether each area receives more rentals t
 \end{equation}
 A positive value means more arrivals than departures; a negative value means the opposite. Unlike the activity map, this ratio describes the direction of the imbalance, not how busy the cell is.
 
-\begin{figure*}[t]
+\begin{figure}
 \centering\includegraphics[width=\textwidth]{balances}
 \caption{Sharing arrival--departure balance in 2023--2024: (a) 06--10, (b) 10--15, (c) 15--20, and (d) night, 20--06. Colour shows $(\mathrm{arrivals}-\mathrm{departures})/(\mathrm{arrivals}+\mathrm{departures})$: red means more arrivals, blue more departures. All panels use the same $[-1,1]$ scale and the same periods and cells as Fig.~\ref{fig:activity}. Crosses mark counters. Background: \copyright{} OpenStreetMap contributors, \url{https://www.openstreetmap.org/copyright}.}
 \label{fig:balance}
-\end{figure*}
+\end{figure}
 
 Read together, the maps distinguish busy areas from areas with a strong arrival--departure imbalance. A busy cell can have a balance close to zero if arrivals and departures are similar. A less busy cell can have a large relative imbalance. The balance does not measure available bicycles, because opening stocks, operator relocations, and maintenance are unknown.
 
@@ -204,7 +196,7 @@ Together, the temporal profiles, OD comparison, and paired maps describe where a
 We now combine sharing records with counters to answer RQ2 through matched feature ablations and RQ3 through spatial and subsequent-year transfer tests. The target is the count of all bicycles passing a section in a given direction, not a total OD matrix. The experimental setting remains fixed so that changes in performance can be attributed to the compared model--feature configurations rather than different test samples.
 
 \subsection{Counter Data and Filtering}
-The municipal dataset reports hourly bicycle counts towards and away from the city centre \cite{bolognaCounters}. The analytical dataset for this study covers seven location groups in 2023--2024 and contains 92,520 device-hour records before quality checks.
+The municipal dataset reports hourly bicycle counts towards and away from the city centre \citep{bolognaCounters}. The analytical dataset for this study covers seven location groups in 2023--2024 and contains 92,520 device-hour records before quality checks.
 
 We remove exact duplicate rows and reject all conflicting rows for the same device and time. Counts must be present and nonnegative in both directions and in the total. The total must equal the sum of directions. We also reject all-zero runs lasting at least 48 consecutive hours. Table~\ref{tab:counter-filter} shows the quality checks: 92,480 valid device-hour records remain. The 24 failed count checks comprise 23 rows with missing or negative values and one further row with an inconsistent total. Rejected records are missing observations, not zero traffic.
 
@@ -270,6 +262,7 @@ A separate \emph{uniform expansion} baseline multiplies the directional 250 m ch
 Counts from a test location never enter its training data or input features. Sharing activity and weather are observed for the period being estimated, so this is not a forecast made before those inputs are available.
 
 \subsection{Training, Testing, and Error Measures}
+\label{sec:evaluation}
 Each of the four eligible locations has at least sixty observed service days in 2023. We leave out one location, train on the other three in 2023, and test at the excluded location. We then test the same fitted model at that location in 2024 without refitting. Neither direction nor a paired device from the test location enters training. For RQ2, we compare the four cumulative feature sets within each model family on identical test rows. For RQ3, the 2023 test measures spatial transfer, while the 2024 test measures joint spatial and subsequent-year transfer. The latter does not isolate temporal change at a previously observed location.
 
 For location $s$, weighted absolute percentage error is
@@ -281,6 +274,7 @@ Lower values are better, and values above 100\%{} are possible. We report two su
 For each paired model comparison, we sample test locations with replacement and calculate the mean difference in location WAPE. The 2.5th and 97.5th percentiles of 2,000 draws give the bootstrap interval. With only four original locations and three training locations per fold, these intervals describe limited spatial variation, not citywide uncertainty. Separate day/night errors, absolute errors, and signed biases are also saved.
 
 \subsection{Prediction Results}
+\label{sec:results}
 Tables~\ref{tab:spatial} and \ref{tab:forward} report the eight model--feature configurations and the separate scaling baseline for the two tests. Within-family feature contrasts answer RQ2; differences between the spatial and subsequent-year tests address RQ3. Macro and pooled errors are WAPE percentages; both matter because an improvement on busy sections can hide poor predictions elsewhere.
 
 \begin{table}[t]
@@ -299,24 +293,25 @@ At the excluded locations in 2024, Poisson WAPE is 39.2\%{} without sharing, 40.
 
 The answer to RQ2 is therefore conditional: sharing improves some configurations, but the strongest 2023 result uses only citywide activity, and richer inputs do not reliably add value. For RQ3, the disappearance of that gain in 2024 shows that a spatial-test improvement alone does not establish stable transfer across both place and year.
 
-\begin{figure*}[t]
+\begin{figure}
 \centering\includegraphics[width=\textwidth]{prediction}
-\caption{Local prediction errors for all eight model--feature configurations. Top row: boosting; bottom row: Poisson regression. Colours identify the same four feature sets in both rows; the scaling baseline is repeated in grey for reference. Left column: 2023 spatial test; right column: excluded-location test in 2024. Each location is excluded from training. Vertical scales match within a column but differ between tests. Lines are not a spatial ordering.}
+\caption{Local prediction errors for all eight model--feature configurations. Top row: boosting; bottom row: Poisson regression. Colours identify the same four feature sets in both rows; the scaling baseline is repeated in grey for reference. Left column: 2023 spatial test; right column: excluded-location test in 2024. Each location is excluded from training. Vertical scales match within a column but differ between tests. Connecting lines do not indicate a spatial ordering.}
 \label{fig:prediction}
-\end{figure*}
+\end{figure}
 
 Figure~\ref{fig:prediction} shows local errors for every model--feature combination, separating boosting and Poisson into two rows. It makes clear which counters improve when each input set is added. Large numbers of hourly records do not remove spatial uncertainty. Paired bootstrap comparisons use the no-sharing version of the same model family; some intervals include zero. Better chord-based predictions also do not prove that cyclists followed the straight lines: these features may simply capture broad links between active areas.
 
 \subsection{Where Predictions Improve or Fail}
+\label{sec:diagnostics}
 The local diagnostics qualify the transfer result for RQ3. In 2023, adding OD geometry to boosting improves WAPE at three locations but worsens it at the fourth (Fig.~\ref{fig:prediction}). Locations with similar observed mean flows can have different nearby rental activity and opposite responses to the added features. Endpoint density is therefore not a uniform substitute for measured bicycle flow.
 
 Figure~\ref{fig:observed-predicted} separates errors in temporal shape from errors in overall volume. Directions are summed, then counts are divided by available exposure hours within each week; all curves use the same complete test periods. Several configurations follow seasonal changes while systematically missing the local traffic level. Poisson regression with sharing also produces peaks at some sites that are absent from the observed counts. Temporal tracking alone is therefore insufficient evidence of successful spatial transfer.
 
-\begin{figure*}[t]
+\begin{figure}
 \centering\includegraphics[width=\textwidth]{observed-predicted}
 \caption{Observed and predicted 2024 bicycle flows at Ercolani, Parri, Sabotino, and San Donato, for selected configurations. Weekly rates pool available complete periods and sum both directions. Models use no training counts from the plotted location. Vertical scales differ by panel; gaps mean unavailable periods, not zero traffic. All configurations' local errors appear in Fig.~\ref{fig:prediction}.}
 \label{fig:observed-predicted}
-\end{figure*}
+\end{figure}
 
 The four sites illustrate distinct failure modes without requiring a separate geographic explanation for each. At Ercolani, boosting with OD geometry remains about 60\%{} below the observed 2024 total, whereas Poisson with the same inputs is about 84\%{} above it: the learner can reverse the bias. At Sabotino, adding local endpoints to boosting increases underestimation from about 9\%{} to 42\%{}, illustrating a mismatch between nearby rentals and through flow. At Parri, boosting with OD geometry overestimates the total by about 179\%{}, consistent with a persistent local-level error rather than isolated temporal peaks. At San Donato, boosting with local endpoints has about 8\%{} negative bias, but adding geometry increases it to about 30\%{}: greater feature detail need not improve local calibration.
 
@@ -325,6 +320,7 @@ The common issue is the distinction between activity near a location and flow th
 The main result is that sharing data add useful information to some models at some locations, but a relationship learned at a few counters does not transfer reliably elsewhere. A stronger no-sharing model can also remove the apparent advantage of sharing. The present comparisons therefore do not support a reliable citywide flow map. They estimate bicycle passages at individual locations, not the origins and destinations that produced them.
 
 \section{Conclusion}
+\label{sec:conclusion}
 This study evaluated selective mobility features for bicycle-flow estimation through a real-world use case, with three research questions linking source quality, incremental predictive value, and transferability.
 
 \emph{RQ1---Usable observations and travel patterns.} The audit retains about 4.6M rentals and identifies a major timestamp failure that must be treated as missing coverage, not low demand. Temporal profiles, OD comparisons, and activity/balance maps describe a predominantly electric service with different daytime and nighttime spatial patterns. These observations characterise the sharing sample; they do not establish its representativeness of all cycling or reveal actual routes.
@@ -335,8 +331,24 @@ This study evaluated selective mobility features for bicycle-flow estimation thr
 
 The broader applied machine-learning contribution is an evaluation protocol: audit the selective source, compare cumulative feature sets against strong contextual baselines across model families, exclude entire locations, test subsequent-year performance, and inspect local bias as well as aggregate error. The Bologna use case demonstrates this protocol, not universal effect sizes. Four eligible locations in one city provide limited spatial evidence, and the subsequent-year test combines spatial and temporal change. Wider validation across locations, services, and cities, together with verified route and contextual information, is needed before deploying these estimates beyond the observed setting. The present models estimate section-level bicycle passages, not the OD demand that generated them.
 
-\noindent{\bf Acknowledgment.} This work is supported by project Support System for Sustainable Smart Cities - S4C, PG/2023/308180 (CUP E27G22000310007). The sharing data used in this study were shared within the project.
+\section*{Acknowledgments}
+This work is supported by the project Support System for Sustainable Smart Cities - S4C, PG/2023/308180 (CUP E27G22000310007). The sharing data used in this study were provided through the project.
 
-\bibliographystyle{IEEEtran}
+\section*{Disclosure statement}
+The authors report no competing interests.
+
+\section*{Author contributions}
+Nicola Bicocchi: conceptualisation and formal analysis. Marco Mamei: writing---original draft and writing---review and editing. All authors approved the final manuscript and agree to be accountable for all aspects of the work.
+
+\section*{Ethics statement}
+Ethical approval was not required for this study.
+
+\section*{Declaration of generative AI use}
+Generative AI was used only for proofreading and preparing submission materials, not for data analysis or interpretation.
+
+\section*{Data availability statement}
+The data and code supporting this study will be available after publication upon request to the corresponding author.
+
+\bibliographystyle{tfapacite}
 \bibliography{references}
 \end{document}

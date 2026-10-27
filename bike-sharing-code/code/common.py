@@ -7,7 +7,7 @@ import pandas as pd
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'results'
 CACHE = ROOT / 'code' / 'dati_esterni'
-TEXT = ROOT.parent / 'paper-vehicle-sharing-text'
+TEXT = ROOT.parent / 'bike-sharing-text'
 for p in [OUT, CACHE, TEXT / 'figures', TEXT / 'tables']:
     p.mkdir(parents=True, exist_ok=True)
 SEED = 20261016
